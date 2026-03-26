@@ -1,0 +1,14 @@
+<header class="flex items-center justify-between border-b border-stone-200 bg-white px-6 py-4">
+  <div>
+    <h1 class="text-lg font-bold text-[#1F1A17]">Sistema de reservaciones</h1>
+    <p class="text-sm text-stone-500">Bienvenido(a), {{ authService.user()?.firstName }}</p>
+  </div>
+
+  <button
+    type="button"
+    class="rounded-xl border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+    (click)="authService.logout()"
+  >
+    Cerrar sesión
+  </button>
+</header>

@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { TopbarComponent } from './components/topbar/topbar.component';
 
 @Component({
   selector: 'app-admin-shell',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, SidebarComponent, TopbarComponent],
   templateUrl: './admin-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

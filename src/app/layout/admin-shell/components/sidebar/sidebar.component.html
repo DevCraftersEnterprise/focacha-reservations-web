@@ -1,0 +1,29 @@
+<aside class="flex h-full w-full flex-col border-r border-stone-200 bg-white">
+  <div class="border-b border-stone-200 px-6 py-4">
+    <h2 class="text-lg font-bold text-[#1F1A17]">Reservaciones</h2>
+    <p class="text-sm text-stone-500">Panel administrativo</p>
+  </div>
+
+  <nav class="flex-1 space-y-2 p-4">
+    @for (item of menuItems(); track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="bg-[#8B1E1E] text-white"
+        class="block rounded-xl px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-[#8B1E1E] hover:text-white"
+      >
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+
+  <div class="border-t border-stone-200 p-4">
+    <div class="rounded-xl bg-stone-50 px-4 py-3">
+      <p class="text-sm font-semibold text-stone-800">
+        {{ authService.user()?.firstName }} {{ authService.user()?.lastName }}
+      </p>
+      <p class="text-xs uppercase tracking-wide text-stone-500">
+        {{ authService.user()?.role }}
+      </p>
+    </div>
+  </div>
+</aside>
