@@ -167,10 +167,11 @@ export class DashboardComponent {
     this.selectedBranchId.set(value);
 
     const current = this.currentDate();
+
     const selected = new Date(
       current.getFullYear(),
       current.getMonth(),
-      1,
+      current.getDate(),
     );
     this.selectedDate.set(this.formatDate(selected));
 
