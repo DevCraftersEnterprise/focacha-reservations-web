@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthUser, LoginRequest, LoginResponse } from '../models/auth.model';
+import { AuthUser, LoginRequest, LoginResponse } from '../models/auth.models';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
