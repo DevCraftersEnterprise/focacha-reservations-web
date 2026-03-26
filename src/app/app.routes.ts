@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { guestGuard } from './core/guards/guest.guard';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
     {
@@ -30,14 +31,17 @@ export const routes: Routes = [
             },
             {
                 path: 'branches',
+                canActivate: [adminGuard],
                 loadComponent: () => import('./features/branches/pages/branches/branches.component').then(m => m.BranchesComponent)
             },
             {
                 path: 'zones',
+                canActivate: [adminGuard],
                 loadComponent: () => import('./features/zones/pages/zones/zones.component').then(m => m.ZonesComponent)
             },
             {
                 path: 'users',
+                canActivate: [adminGuard],
                 loadComponent: () => import('./features/users/pages/users/users.component').then(m => m.UsersComponent)
             },
         ]
