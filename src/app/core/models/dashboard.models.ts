@@ -1,14 +1,3 @@
-export interface BranchItem {
-    id: string;
-    name: string;
-    address: string;
-    phone: string | null;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-    deletedAt: string | null;
-}
-
 export interface ReservationCalendarItem {
     date: string;
     count: number;

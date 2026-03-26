@@ -4,7 +4,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { DashboardService } from '../../../../core/services/dashboard.service';
-import { BranchItem, ReservationCalendarItem, ReservationDayDetailResponse } from '../../../../core/models/dashboard.models';
+import { ReservationCalendarItem, ReservationDayDetailResponse } from '../../../../core/models/dashboard.models';
+import { BranchItem } from '../../../../core/models/branch.models';
 
 interface CalendarDayCell {
   date: string;
