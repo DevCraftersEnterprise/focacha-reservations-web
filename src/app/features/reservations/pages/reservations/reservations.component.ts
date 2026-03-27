@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { ReservationsService } from '../../../../core/services/reservations.service';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { ZonesService } from '../../../../core/services/zones.service';
@@ -8,7 +9,6 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ReservationItem, ReservationStatus } from '../../../../core/models/reservation.models';
 import { BranchItem } from '../../../../core/models/branch.models';
 import { ZoneItem } from '../../../../core/models/zone.models';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-reservations',
@@ -26,7 +26,6 @@ export class ReservationsComponent implements OnDestroy {
 
   readonly reservations = signal<ReservationItem[]>([]);
   readonly branches = signal<BranchItem[]>([]);
-  readonly zones = signal<ZoneItem[]>([]);
   readonly availableZones = signal<ZoneItem[]>([]);
 
   readonly loading = signal<boolean>(false);
@@ -50,22 +49,25 @@ export class ReservationsComponent implements OnDestroy {
   readonly isAdmin = computed(() => this.authService.isAdmin());
   readonly isCashier = computed(() => this.authService.isCashier());
   readonly currentUser = computed(() => this.authService.user());
-  ;
+  readonly cashierBranchName = computed(
+    () => this.currentUser()?.branch?.name || 'Sucursal asignada',
+  );
+
   readonly form = this.fb.nonNullable.group({
-    reservationDate: ["", [Validators.required]],
-    reservationTime: ["", [Validators.required]],
+    reservationDate: ['', [Validators.required]],
+    reservationTime: ['', [Validators.required]],
     guestCount: [1, [Validators.required, Validators.min(1)]],
-    branchId: ["", [Validators.required, Validators.min(1)]],
-    zoneId: ["", [Validators.required, Validators.min(1)]],
-    eventType: ["", [Validators.required, Validators.maxLength(150)]],
-    customerName: ["", [Validators.required, Validators.maxLength(150)]],
-    phonePrimary: ["", [Validators.required, Validators.maxLength(20)]],
-    phoneSecondary: ["", [Validators.maxLength(20)]],
-    notes: ["", [Validators.maxLength(2000)]],
+    branchId: ['', [Validators.required]],
+    zoneId: ['', [Validators.required]],
+    eventType: ['', [Validators.required, Validators.maxLength(150)]],
+    customerName: ['', [Validators.required, Validators.maxLength(150)]],
+    phonePrimary: ['', [Validators.required, Validators.maxLength(20)]],
+    phoneSecondary: ['', [Validators.maxLength(20)]],
+    notes: ['', [Validators.maxLength(2000)]],
   });
 
   readonly cancelForm = this.fb.nonNullable.group({
-    reason: ['', [Validators.maxLength(250)]]
+    reason: ['', [Validators.maxLength(250)]],
   });
 
   constructor() {
@@ -73,17 +75,6 @@ export class ReservationsComponent implements OnDestroy {
     this.loadReservations();
 
     this.branchIdSub = this.form.controls.branchId.valueChanges.subscribe((branchId) => {
-      if (branchId) {
-        this.loadZonesByBranch(branchId);
-      } else {
-        this.availableZones.set([]);
-        this.form.controls.zoneId.setValue('', { emitEvent: false });
-      }
-    });
-
-    effect(() => {
-      const branchId = this.form.controls.branchId.value;
-
       if (branchId) {
         this.loadZonesByBranch(branchId);
       } else {
@@ -100,10 +91,12 @@ export class ReservationsComponent implements OnDestroy {
   loadBranches(): void {
     if (this.isCashier()) {
       const user = this.currentUser();
+
       if (user?.branchId) {
         this.selectedBranchFilter.set(user.branchId);
         this.form.controls.branchId.setValue(user.branchId, { emitEvent: false });
       }
+
       return;
     }
 
@@ -113,10 +106,6 @@ export class ReservationsComponent implements OnDestroy {
       next: (branches) => {
         this.branches.set(branches);
         this.loadingBranches.set(false);
-
-        if (!this.selectedBranchFilter() && branches.length > 0) {
-          this.selectedBranchFilter.set(branches[0].id);
-        }
       },
       error: () => {
         this.loadingBranches.set(false);
@@ -129,12 +118,12 @@ export class ReservationsComponent implements OnDestroy {
 
     this.zonesService.findByBranchId(branchId).subscribe({
       next: (zones) => {
-        const activeZones = zones.filter(zone => zone.isActive);
+        const activeZones = zones.filter((zone) => zone.isActive);
         this.availableZones.set(activeZones);
         this.loadingZones.set(false);
 
         const currentZoneId = this.form.controls.zoneId.value;
-        const exists = activeZones.some(zone => zone.id === currentZoneId);
+        const exists = activeZones.some((zone) => zone.id === currentZoneId);
 
         if (!exists) {
           this.form.controls.zoneId.setValue('', { emitEvent: false });
@@ -143,7 +132,7 @@ export class ReservationsComponent implements OnDestroy {
       error: () => {
         this.availableZones.set([]);
         this.loadingZones.set(false);
-      }
+      },
     });
   }
 
@@ -160,7 +149,9 @@ export class ReservationsComponent implements OnDestroy {
     const currentUser = this.currentUser();
 
     if (this.isCashier()) {
-      if (currentUser?.branchId) filters.branchId = currentUser.branchId;
+      if (currentUser?.branchId) {
+        filters.branchId = currentUser.branchId;
+      }
     } else if (this.selectedBranchFilter()) {
       filters.branchId = this.selectedBranchFilter()!;
     }
@@ -181,11 +172,10 @@ export class ReservationsComponent implements OnDestroy {
       error: (error) => {
         this.loading.set(false);
         this.errorMessage.set(
-          this.extractErrorMessage(error, 'No se pudieron cargar las reservaciones.')
+          this.extractErrorMessage(error, 'No se pudieron cargar las reservaciones.'),
         );
-      }
+      },
     });
-
   }
 
   onBranchFilterChange(value: string): void {
@@ -219,8 +209,6 @@ export class ReservationsComponent implements OnDestroy {
       ? cashierBranchId
       : (this.branches()[0]?.id ?? '');
 
-    console.log({ availableZones: this.availableZones() });
-
     this.editingReservation.set(null);
     this.form.reset({
       reservationDate: '',
@@ -234,6 +222,12 @@ export class ReservationsComponent implements OnDestroy {
       phoneSecondary: '',
       notes: '',
     });
+
+    this.availableZones.set([]);
+
+    if (initialBranchId) {
+      this.loadZonesByBranch(initialBranchId);
+    }
 
     this.errorMessage.set('');
     this.successMessage.set('');
@@ -256,6 +250,9 @@ export class ReservationsComponent implements OnDestroy {
       notes: reservation.notes ?? '',
     });
 
+    this.availableZones.set([]);
+    this.loadZonesByBranch(reservation.branchId);
+
     this.errorMessage.set('');
     this.successMessage.set('');
     this.showFormModal.set(true);
@@ -264,6 +261,7 @@ export class ReservationsComponent implements OnDestroy {
   closeFormModal(): void {
     this.showFormModal.set(false);
     this.editingReservation.set(null);
+    this.availableZones.set([]);
   }
 
   submit(): void {
