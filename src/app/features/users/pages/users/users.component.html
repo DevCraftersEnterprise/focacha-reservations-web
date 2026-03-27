@@ -292,3 +292,42 @@
     </div>
   </div>
 }
+
+@if (showDeleteModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-xl">
+      <div class="border-b border-stone-200 px-6 py-4">
+        <h3 class="text-lg font-bold text-stone-900">Eliminar usuario</h3>
+        <p class="text-sm text-stone-500">Esta acción no se puede deshacer.</p>
+      </div>
+
+      <div class="px-6 py-5">
+        <p class="text-sm text-stone-700">
+          ¿Seguro de que deseas eliminar el usuario
+          <span class="font-semibold"
+            >{{ deletingUser()?.firstName }} {{ deletingUser()?.lastName }}</span
+          >?
+        </p>
+      </div>
+
+      <div class="flex justify-end gap-3 border-t border-stone-200 px-6 py-4">
+        <button
+          type="button"
+          class="rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
+          (click)="closeDeleteModal()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          class="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="saving()"
+          (click)="confirmDelete()"
+        >
+          {{ saving() ? 'Eliminando...' : 'Eliminar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
