@@ -1,3 +1,4 @@
+import { BranchItem } from "./branch.models";
 import { UserRole } from "./user.models";
 
 export interface LoginRequest {
@@ -12,6 +13,7 @@ export interface AuthUser {
     email: string;
     role: UserRole;
     branchId: string | null;
+    branch?: BranchItem;
 }
 
 export interface LoginResponse {
