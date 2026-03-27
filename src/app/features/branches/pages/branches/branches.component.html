@@ -180,7 +180,7 @@
 
           <button
             type="submit"
-            class="rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            class="rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             [disabled]="saving()"
           >
             {{ saving() ? 'Guardando ...' : editingBranch() ? 'Actualizar' : 'Crear' }}
@@ -218,7 +218,7 @@
 
         <button
           type="submit"
-          class="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          class="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           [disabled]="saving()"
           (click)="confirmDelete()"
         >
@@ -242,10 +242,10 @@
 
         <button
           type="button"
-          class="rounded-lg px-3 py-2 text-stone-500 transition hover:bg-stone-100"
+          class="rounded-lg px-3 py-2 text-stone-500 transition hover:bg-stone-100 cursor-pointer"
           (click)="closeAssignCashiersModal()"
         >
-          ✕
+          X
         </button>
       </div>
 
@@ -296,7 +296,7 @@
       <div class="flex justify-end gap-3 border-t border-stone-200 px-6 py-4">
         <button
           type="button"
-          class="rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+          class="rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
           (click)="closeAssignCashiersModal()"
         >
           Cancelar
@@ -304,7 +304,7 @@
 
         <button
           type="button"
-          class="rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          class="rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           [disabled]="saving() || loadingUsers()"
           (click)="submitCashierSync()"
         >

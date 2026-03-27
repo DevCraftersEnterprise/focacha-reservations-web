@@ -282,7 +282,7 @@
 
           <button
             type="submit"
-            class="rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            class="rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             [disabled]="saving()"
           >
             {{ saving() ? 'Guardando ...' : isEditing() ? 'Actualizar' : 'Crear' }}
@@ -321,7 +321,7 @@
 
         <button
           type="submit"
-          class="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          class="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           [disabled]="saving()"
           (click)="confirmDelete()"
         >
