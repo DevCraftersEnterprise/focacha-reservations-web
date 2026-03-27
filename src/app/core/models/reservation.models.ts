@@ -4,6 +4,12 @@ import { ZoneItem } from "./zone.models";
 
 export type ReservationStatus = 'ACTIVE' | 'CANCELLED';
 
+export interface ReservationFilters {
+    branchId?: string;
+    reservationDate?: string;
+    status?: ReservationStatus;
+}
+
 export interface ReservationItem {
     id: string;
     reservationDate: string;
