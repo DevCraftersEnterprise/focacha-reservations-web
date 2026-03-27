@@ -79,6 +79,14 @@
                   <div class="flex justify-end gap-2">
                     <button
                       type="button"
+                      class="rounded-xl border border-[#D9A441] px-4 py-2 text-sm font-medium text-[#8B1E1E] transition hover:bg-[#F7F3EE] cursor-pointer"
+                      (click)="openAssignCashiersModal(branch)"
+                    >
+                      Asignar cajeros
+                    </button>
+
+                    <button
+                      type="button"
                       class="rounded-xl border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
                       (click)="openEditModal(branch)"
                     >
@@ -215,6 +223,92 @@
           (click)="confirmDelete()"
         >
           {{ saving() ? 'Eliminando...' : 'Eliminar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showAssignCashiersModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
+    <div class="w-full max-w-2xl rounded-2xl bg-white shadow-xl">
+      <div class="flex items-center justify-between border-b border-stone-200 px-6 py-4">
+        <div>
+          <h3 class="text-lg font-bold text-stone-900">Asignar cajeros</h3>
+          <p class="text-sm text-stone-500">
+            Sucursal: <span class="font-semibold">{{ assigningBranch()?.name }}</span>
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="rounded-lg px-3 py-2 text-stone-500 transition hover:bg-stone-100"
+          (click)="closeAssignCashiersModal()"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="px-6 py-6">
+        @if (loadingUsers()) {
+          <div
+            class="rounded-xl border border-dashed border-stone-300 px-4 py-10 text-center text-sm text-stone-500"
+          >
+            Cargando cajeros...
+          </div>
+        } @else if (cashiers.length === 0) {
+          <div
+            class="rounded-xl border border-dashed border-stone-300 px-4 py-10 text-center text-sm text-stone-500"
+          >
+            No hay usuarios con rol CASHIER registrados.
+          </div>
+        } @else {
+          <div class="space-y-3">
+            @for (cashier of cashiers; track cashier.id) {
+              <label
+                class="flex items-start gap-3 rounded-xl border border-stone-200 px-4 py-3 transition hover:bg-stone-50"
+              >
+                <input
+                  type="checkbox"
+                  class="mt-1 h-4 w-4 rounded border-stone-300"
+                  [checked]="isCashierSelected(cashier.id)"
+                  (change)="toggleCashier(cashier.id, $any($event.target).checked)"
+                />
+
+                <div class="min-w-0">
+                  <p class="font-medium text-stone-900">
+                    {{ cashier.firstName }} {{ cashier.lastName }}
+                  </p>
+                  <p class="text-sm text-stone-500">{{ cashier.email }}</p>
+
+                  @if (cashier.branch?.name && cashier.branchId !== assigningBranch()?.id) {
+                    <p class="mt-1 text-xs text-amber-700">
+                      Actualmente asignado a: {{ cashier.branch?.name }}
+                    </p>
+                  }
+                </div>
+              </label>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="flex justify-end gap-3 border-t border-stone-200 px-6 py-4">
+        <button
+          type="button"
+          class="rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+          (click)="closeAssignCashiersModal()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="saving() || loadingUsers()"
+          (click)="submitCashierSync()"
+        >
+          {{ saving() ? 'Guardando...' : 'Guardar asignación' }}
         </button>
       </div>
     </div>

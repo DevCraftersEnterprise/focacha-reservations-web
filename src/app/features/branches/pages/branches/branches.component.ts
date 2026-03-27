@@ -203,7 +203,7 @@ export class BranchesComponent {
     });
   }
 
-  openAssignCashierModal(branch: BranchItem): void {
+  openAssignCashiersModal(branch: BranchItem): void {
     this.assigningBranch.set(branch);
     this.errorMessage.set('');
     this.successMessage.set('');
@@ -212,7 +212,7 @@ export class BranchesComponent {
     this.loadUsersForAssignment(branch);
   }
 
-  closeAssignCashierModal(): void {
+  closeAssignCashiersModal(): void {
     this.assigningBranch.set(null);
     this.showAssignCashiersModal.set(false);
     this.clearCashierSelections();
@@ -255,7 +255,7 @@ export class BranchesComponent {
       next: () => {
         this.saving.set(false);
         this.successMessage.set('Cajeros asignados correctamente.');
-        this.closeAssignCashierModal();
+        this.closeAssignCashiersModal();
         this.loadBranches();
       },
       error: (error) => {
