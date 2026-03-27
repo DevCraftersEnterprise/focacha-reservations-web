@@ -93,19 +93,157 @@ export class UsersComponent {
     });
   }
 
-  openCreateModal(): void { }
+  openCreateModal(): void {
+    this.editingUser.set(null);
+    this.form.reset({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      role: 'CASHIER',
+      branchId: null,
+      isActive: true
+    });
 
-  openEditModal(user: UserItem): void { }
+    this.form.controls.password.setValidators([
+      Validators.required,
+      Validators.minLength(6)
+    ]);
 
-  closeFormModal(): void { }
+    this.form.controls.password.updateValueAndValidity();
 
-  submit(): void { }
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.showFormModal.set(true);
+  }
 
-  openDeleteModal(user: UserItem): void { }
+  openEditModal(user: UserItem): void {
+    this.editingUser.set(user);
+    this.form.reset({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      password: '',
+      role: user.role,
+      branchId: user.branchId,
+      isActive: user.isActive,
+    });
 
-  closeDeleteModal(): void { }
+    this.form.controls.password.clearValidators
+    this.form.controls.password.setValidators([Validators.minLength(6)]);
+    this.form.controls.password.updateValueAndValidity();
 
-  confirmDelete(): void { }
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.showFormModal.set(true);
+  }
+
+  closeFormModal(): void {
+    this.showFormModal.set(false);
+    this.editingUser.set(null);
+    this.form.reset({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      role: 'CASHIER',
+      branchId: null,
+      isActive: true
+    });
+  }
+
+  submit(): void {
+    if (this.form.invalid || this.saving()) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const raw = this.form.getRawValue();
+    const editing = this.editingUser();
+
+    const basePayload = {
+      firstName: raw.firstName.trim(),
+      lastName: raw.lastName.trim(),
+      email: raw.email.trim(),
+      role: raw.role,
+      isActive: raw.isActive,
+    }
+
+    let request$;
+
+    if (editing) {
+      const updatePayload = {
+        ...basePayload,
+        ...(raw.role === 'CASHIER' && raw.branchId ? { branchId: raw.branchId } : {}),
+        ...(raw.password.trim() ? { password: raw.password.trim() } : {}),
+      };
+      request$ = this.usersService.update(editing.id, updatePayload);
+    } else {
+      const createPayload = {
+        ...basePayload,
+        password: raw.password.trim(),
+        ...(raw.role === 'CASHIER' && raw.branchId ? { branchId: raw.branchId } : {}),
+      };
+      request$ = this.usersService.create(createPayload);
+    }
+
+    this.saving.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    request$.subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.successMessage.set(`Usuario ${editing ? 'actualizado' : 'creado'} exitosamente.`);
+        this.closeFormModal();
+        this.loadUsers();
+      },
+      error: (error) => {
+        this.saving.set(false);
+        this.errorMessage.set(
+          error?.error?.message ||
+          `No se pudo ${editing ? 'actualizar' : 'crear'} el usuario.`,
+        );
+      }
+    });
+  }
+
+  openDeleteModal(user: UserItem): void {
+    this.deletingUser.set(user);
+    this.showDeleteModal.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+  }
+
+  closeDeleteModal(): void {
+    this.deletingUser.set(null);
+    this.showDeleteModal.set(false);
+  }
+
+  confirmDelete(): void {
+    const user = this.deletingUser();
+
+    if (!user || this.saving()) return;
+
+    this.saving.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.usersService.remove(user.id).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.successMessage.set('Usuario eliminado correctamente.');
+        this.closeDeleteModal();
+        this.loadUsers();
+      },
+      error: (error) => {
+        this.saving.set(false);
+        this.errorMessage.set(
+          this.extractErrorMessage(error, 'No se pudo eliminar el usuario.'),
+        );
+      }
+    });
+  }
 
   private extractErrorMessage(error: any, fallback: string): string {
     const message = error?.error?.message;
