@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
+
 import { ReservationsService } from '../../../../core/services/reservations.service';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { ZonesService } from '../../../../core/services/zones.service';
 import { AuthService } from '../../../../core/services/auth.service';
+
 import { ReservationItem, ReservationStatus } from '../../../../core/models/reservation.models';
 import { BranchItem } from '../../../../core/models/branch.models';
 import { ZoneItem } from '../../../../core/models/zone.models';
@@ -50,7 +52,7 @@ export class ReservationsComponent implements OnDestroy {
   readonly isCashier = computed(() => this.authService.isCashier());
   readonly currentUser = computed(() => this.authService.user());
   readonly cashierBranchName = computed(
-    () => this.currentUser()?.branch?.name || 'Sucursal asignada',
+    () => this.currentUser()?.branch?.name || 'Sucursal desconocida',
   );
 
   readonly form = this.fb.nonNullable.group({
@@ -88,15 +90,28 @@ export class ReservationsComponent implements OnDestroy {
     this.branchIdSub?.unsubscribe();
   }
 
+  private getEffectiveCashierBranchId(): string {
+    return this.currentUser()?.branchId || this.currentUser()?.branch?.id || '';
+  }
+
+  private initializeCashierContext(): void {
+    if (!this.isCashier()) return;
+
+    const branchId = this.getEffectiveCashierBranchId();
+
+    if (!branchId) {
+      this.errorMessage.set('Tu usuario no tiene una sucursal asignada.');
+      return;
+    }
+
+    this.selectedBranchFilter.set(branchId);
+    this.form.controls.branchId.setValue(branchId, { emitEvent: false });
+    this.loadZonesByBranch(branchId);
+  }
+
   loadBranches(): void {
     if (this.isCashier()) {
-      const user = this.currentUser();
-
-      if (user?.branchId) {
-        this.selectedBranchFilter.set(user.branchId);
-        this.form.controls.branchId.setValue(user.branchId, { emitEvent: false });
-      }
-
+      this.initializeCashierContext();
       return;
     }
 
@@ -107,13 +122,22 @@ export class ReservationsComponent implements OnDestroy {
         this.branches.set(branches);
         this.loadingBranches.set(false);
       },
-      error: () => {
+      error: (error) => {
         this.loadingBranches.set(false);
+        this.errorMessage.set(
+          this.extractErrorMessage(error, 'No se pudieron cargar las sucursales.'),
+        );
       },
     });
   }
 
   loadZonesByBranch(branchId: string): void {
+    if (!branchId) {
+      this.availableZones.set([]);
+      this.form.controls.zoneId.setValue('', { emitEvent: false });
+      return;
+    }
+
     this.loadingZones.set(true);
 
     this.zonesService.findByBranchId(branchId).subscribe({
@@ -128,10 +152,17 @@ export class ReservationsComponent implements OnDestroy {
         if (!exists) {
           this.form.controls.zoneId.setValue('', { emitEvent: false });
         }
+
+        if (activeZones.length === 0) {
+          this.errorMessage.set('La sucursal seleccionada no tiene zonas activas disponibles.');
+        }
       },
-      error: () => {
+      error: (error) => {
         this.availableZones.set([]);
         this.loadingZones.set(false);
+        this.errorMessage.set(
+          this.extractErrorMessage(error, 'No se pudieron cargar las zonas de la sucursal.'),
+        );
       },
     });
   }
@@ -149,8 +180,9 @@ export class ReservationsComponent implements OnDestroy {
     const currentUser = this.currentUser();
 
     if (this.isCashier()) {
-      if (currentUser?.branchId) {
-        filters.branchId = currentUser.branchId;
+      const branchId = currentUser?.branchId || currentUser?.branch?.id;
+      if (branchId) {
+        filters.branchId = branchId;
       }
     } else if (this.selectedBranchFilter()) {
       filters.branchId = this.selectedBranchFilter()!;
@@ -204,12 +236,15 @@ export class ReservationsComponent implements OnDestroy {
   }
 
   openCreateModal(): void {
-    const cashierBranchId = this.currentUser()?.branchId ?? '';
     const initialBranchId = this.isCashier()
-      ? cashierBranchId
+      ? this.getEffectiveCashierBranchId()
       : (this.branches()[0]?.id ?? '');
 
     this.editingReservation.set(null);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.availableZones.set([]);
+
     this.form.reset({
       reservationDate: '',
       reservationTime: '',
@@ -223,19 +258,18 @@ export class ReservationsComponent implements OnDestroy {
       notes: '',
     });
 
-    this.availableZones.set([]);
+    this.showFormModal.set(true);
 
     if (initialBranchId) {
       this.loadZonesByBranch(initialBranchId);
     }
-
-    this.errorMessage.set('');
-    this.successMessage.set('');
-    this.showFormModal.set(true);
   }
 
   openEditModal(reservation: ReservationItem): void {
     this.editingReservation.set(reservation);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.availableZones.set([]);
 
     this.form.reset({
       reservationDate: reservation.reservationDate,
@@ -250,12 +284,8 @@ export class ReservationsComponent implements OnDestroy {
       notes: reservation.notes ?? '',
     });
 
-    this.availableZones.set([]);
-    this.loadZonesByBranch(reservation.branchId);
-
-    this.errorMessage.set('');
-    this.successMessage.set('');
     this.showFormModal.set(true);
+    this.loadZonesByBranch(reservation.branchId);
   }
 
   closeFormModal(): void {
@@ -328,9 +358,7 @@ export class ReservationsComponent implements OnDestroy {
 
   openCancelModal(reservation: ReservationItem): void {
     this.cancellingReservation.set(reservation);
-    this.cancelForm.reset({
-      reason: '',
-    });
+    this.cancelForm.reset({ reason: '' });
     this.errorMessage.set('');
     this.successMessage.set('');
     this.showCancelModal.set(true);
@@ -339,9 +367,7 @@ export class ReservationsComponent implements OnDestroy {
   closeCancelModal(): void {
     this.cancellingReservation.set(null);
     this.showCancelModal.set(false);
-    this.cancelForm.reset({
-      reason: '',
-    });
+    this.cancelForm.reset({ reason: '' });
   }
 
   confirmCancel(): void {
