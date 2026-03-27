@@ -1,3 +1,5 @@
+import { UserRole } from "./user.models";
+
 export interface LoginRequest {
     email: string;
     password: string;
@@ -8,7 +10,7 @@ export interface AuthUser {
     firstName: string;
     lastName: string;
     email: string;
-    role: 'ADMIN' | 'CASHIER';
+    role: UserRole;
     branchId: string | null;
 }
 
