@@ -1,4 +1,286 @@
-<div class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-  <h2 class="text-xl font-bold text-stone-900">Zonas</h2>
-  <p class="mt-1 text-sm text-stone-500">Pantalla en construcción.</p>
+<div class="space-y-6">
+  <section class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-stone-900">Zonas</h2>
+        <p class="mt-1 text-sm text-stone-500">Administra las zonas de cada sucursal.</p>
+      </div>
+
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="min-w-60">
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+            Filtrar por sucursal
+          </label>
+          <select
+            class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-stone-500"
+            [value]="selectedBranchFilter() ?? ''"
+            (change)="onBranchFilterChange($any($event.target).value)"
+          >
+            <option value="">Todas las sucursales</option>
+            @for (branch of branches(); track branch.id) {
+              <option [value]="branch.id">{{ branch.name }}</option>
+            }
+          </select>
+        </div>
+
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+          (click)="openCreateModal()"
+        >
+          Nueva zona
+        </button>
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    @if (successMessage()) {
+      <div
+        class="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+      >
+        {{ successMessage() }}
+      </div>
+    }
+  </section>
+
+  <section class="rounded-2xl border border-stone-200 bg-white shadow-sm">
+    @if (loading()) {
+      <div class="px-6 py-10 text-center text-sm text-stone-500">Cargando zonas...</div>
+    } @else if (filteredZones().length === 0) {
+      <div class="px-6 py-10 text-center text-sm text-stone-500">
+        No hay zonas registradas para el filtro actual.
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-stone-200">
+          <thead class="bg-stone-50">
+            <tr>
+              <th
+                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-stone-500"
+              >
+                Nombre
+              </th>
+              <th
+                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-stone-500"
+              >
+                Sucursal
+              </th>
+              <th
+                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-stone-500"
+              >
+                Capacidad
+              </th>
+              <th
+                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-stone-500"
+              >
+                Estatus
+              </th>
+              <th
+                class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-stone-500"
+              >
+                Acciones
+              </th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-stone-100">
+            @for (zone of filteredZones(); track zone.id) {
+              <tr class="hover:bg-stone-50">
+                <td class="px-6 py-4">
+                  <p class="font-semibold text-stone-900">{{ zone.name }}</p>
+                </td>
+
+                <td class="px-6 py-4 text-sm text-stone-600">
+                  {{ zone.branch?.name || 'Sucursal ' + zone.branchId }}
+                </td>
+
+                <td class="px-6 py-4 text-sm text-stone-600">
+                  {{ zone.capacity ?? '—' }}
+                </td>
+
+                <td class="px-6 py-4">
+                  <span
+                    class="rounded-full px-3 py-1 text-xs font-semibold"
+                    [class.bg-green-100]="zone.isActive"
+                    [class.text-green-800]="zone.isActive"
+                    [class.bg-red-100]="!zone.isActive"
+                    [class.text-red-800]="!zone.isActive"
+                  >
+                    {{ zone.isActive ? 'Activa' : 'Inactiva' }}
+                  </span>
+                </td>
+
+                <td class="px-6 py-4">
+                  <div class="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      class="rounded-xl border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+                      (click)="openEditModal(zone)"
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      type="button"
+                      class="rounded-xl border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50"
+                      (click)="openDeleteModal(zone)"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
 </div>
+
+@if (showFormModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
+    <div class="w-full max-w-2xl rounded-2xl bg-white shadow-xl">
+      <div class="flex items-center justify-between border-b border-stone-200 px-6 py-4">
+        <div>
+          <h3 class="text-lg font-bold text-stone-900">
+            {{ editingZone() ? 'Editar zona' : 'Nueva zona' }}
+          </h3>
+          <p class="text-sm text-stone-500">Captura la sucursal y los datos de la zona.</p>
+        </div>
+
+        <button
+          type="button"
+          class="rounded-lg px-3 py-2 text-stone-500 transition hover:bg-stone-100"
+          (click)="closeFormModal()"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form class="space-y-4 px-6 py-6" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-stone-700">Nombre</label>
+            <input
+              type="text"
+              formControlName="name"
+              class="w-full rounded-xl border px-4 py-3 outline-none transition"
+              [class.border-red-400]="form.controls.name.invalid && form.controls.name.touched"
+              [class.border-stone-300]="!(form.controls.name.invalid && form.controls.name.touched)"
+              placeholder="Terraza"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-stone-700">Sucursal</label>
+            <select
+              formControlName="branchId"
+              class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none transition"
+            >
+              <option [value]="0">Selecciona una sucursal</option>
+              @for (branch of branches(); track branch.id) {
+                <option [value]="branch.id">{{ branch.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-stone-700">Capacidad</label>
+            <input
+              type="number"
+              min="1"
+              formControlName="capacity"
+              class="w-full rounded-xl border px-4 py-3 outline-none transition"
+              [class.border-red-400]="
+                form.controls.capacity.invalid && form.controls.capacity.touched
+              "
+              [class.border-stone-300]="
+                !(form.controls.capacity.invalid && form.controls.capacity.touched)
+              "
+              placeholder="30"
+            />
+          </div>
+
+          @if (editingZone()) {
+            <div class="flex items-end">
+              <label
+                class="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3"
+              >
+                <input
+                  type="checkbox"
+                  formControlName="isActive"
+                  class="h-4 w-4 rounded border-stone-300"
+                />
+                <span class="text-sm font-medium text-stone-700">Zona activa</span>
+              </label>
+            </div>
+          }
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            class="rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+            (click)="closeFormModal()"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            [disabled]="saving() || loadingBranches()"
+          >
+            {{ saving() ? 'Guardando...' : editingZone() ? 'Actualizar' : 'Crear' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showDeleteModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-xl">
+      <div class="border-b border-stone-200 px-6 py-4">
+        <h3 class="text-lg font-bold text-stone-900">Eliminar zona</h3>
+        <p class="text-sm text-stone-500">Esta acción realiza eliminación lógica.</p>
+      </div>
+
+      <div class="px-6 py-5">
+        <p class="text-sm text-stone-700">
+          ¿Seguro que deseas eliminar la zona
+          <span class="font-semibold">{{ deletingZone()?.name }}</span
+          >?
+        </p>
+      </div>
+
+      <div class="flex justify-end gap-3 border-t border-stone-200 px-6 py-4">
+        <button
+          type="button"
+          class="rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+          (click)="closeDeleteModal()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="saving()"
+          (click)="confirmDelete()"
+        >
+          {{ saving() ? 'Eliminando...' : 'Eliminar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

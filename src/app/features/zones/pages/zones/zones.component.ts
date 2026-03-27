@@ -142,16 +142,23 @@ export class ZonesComponent {
     const raw = this.form.getRawValue();
     const editing = this.editingZone();
 
-    const payload = {
+    const basePayload = {
       name: raw.name.trim(),
       branchId: raw.branchId,
       capacity: raw.capacity === null || raw.capacity === undefined || raw.capacity === ('' as any) ? undefined : Number(raw.capacity),
-      isActive: raw.isActive,
     }
 
-    const request$ = editing
-      ? this.zonesService.update(editing.id, payload)
-      : this.zonesService.create(payload);
+    let request$;
+
+    if (editing) {
+      const updatePayload = {
+        ...basePayload,
+        isActive: raw.isActive,
+      };
+      request$ = this.zonesService.update(editing.id, updatePayload)
+    } else {
+      request$ = this.zonesService.create(basePayload);
+    }
 
     this.saving.set(true);
     this.errorMessage.set('');
