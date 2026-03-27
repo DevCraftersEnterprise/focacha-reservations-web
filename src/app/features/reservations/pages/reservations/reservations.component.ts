@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ReservationsService } from '../../../../core/services/reservations.service';
 import { BranchesService } from '../../../../core/services/branches.service';
@@ -8,13 +8,16 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ReservationItem, ReservationStatus } from '../../../../core/models/reservation.models';
 import { BranchItem } from '../../../../core/models/branch.models';
 import { ZoneItem } from '../../../../core/models/zone.models';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-reservations',
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './reservations.component.html',
 })
-export class ReservationsComponent {
+export class ReservationsComponent implements OnDestroy {
+  private branchIdSub: Subscription;
+
   private readonly fb = inject(FormBuilder);
   private readonly reservationsService = inject(ReservationsService);
   private readonly branchesService = inject(BranchesService);
@@ -69,6 +72,15 @@ export class ReservationsComponent {
     this.loadBranches();
     this.loadReservations();
 
+    this.branchIdSub = this.form.controls.branchId.valueChanges.subscribe((branchId) => {
+      if (branchId) {
+        this.loadZonesByBranch(branchId);
+      } else {
+        this.availableZones.set([]);
+        this.form.controls.zoneId.setValue('', { emitEvent: false });
+      }
+    });
+
     effect(() => {
       const branchId = this.form.controls.branchId.value;
 
@@ -79,6 +91,10 @@ export class ReservationsComponent {
         this.form.controls.zoneId.setValue('', { emitEvent: false });
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.branchIdSub?.unsubscribe();
   }
 
   loadBranches(): void {
@@ -202,6 +218,8 @@ export class ReservationsComponent {
     const initialBranchId = this.isCashier()
       ? cashierBranchId
       : (this.branches()[0]?.id ?? '');
+
+    console.log({ availableZones: this.availableZones() });
 
     this.editingReservation.set(null);
     this.form.reset({
