@@ -64,8 +64,9 @@ export class DashboardComponent {
 
     const cells: CalendarDayCell[] = [];
     const summaryMap = new Map(
-      this.calendarSummary().map((item) => [item.date, item.count]),
+      this.calendarSummary().map((item) => [item.date.split('T')[0], item.count]),
     );
+
 
     const todayStr = this.formatDate(new Date());
     const selected = this.selectedDate();
