@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
-import { BranchItem, CreateBranchRequest, UpdateBranchRequest } from '../models/branch.models';
+import { AssignCashiersRequest, AssignCashiersResponse, BranchItem, CreateBranchRequest, UpdateBranchRequest } from '../models/branch.models';
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +26,13 @@ export class BranchesService {
 
   update(id: string, payload: UpdateBranchRequest): Observable<BranchItem> {
     return this.http.patch<BranchItem>(`${this.apiUrl}/branches/${id}`, payload);
+  }
+
+  assignCashiers(id: string, payload: AssignCashiersRequest): Observable<AssignCashiersResponse> {
+    return this.http.patch<AssignCashiersResponse>(
+      `${this.apiUrl}/branches/${id}/assign-cashiers`,
+      payload
+    );
   }
 
   remove(id: string): Observable<void> {

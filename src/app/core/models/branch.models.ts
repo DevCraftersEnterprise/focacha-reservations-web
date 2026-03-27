@@ -21,3 +21,14 @@ export interface UpdateBranchRequest {
     phone?: string;
     isActive?: boolean;
 }
+
+export interface AssignCashiersRequest {
+    cashierIds: string[];
+}
+
+export interface AssignCashiersResponse {
+    message: string;
+    branchId: string;
+    assignedCashierIds: string[];
+    unassignedCashierIds: string[];
+}

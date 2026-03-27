@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { BranchItem } from '../../../../core/models/branch.models';
+import { UsersService } from '../../../../core/services/users.service';
+import { UserItem } from '../../../../core/models/user.models';
 
 @Component({
   selector: 'app-branches',
@@ -12,18 +14,25 @@ import { BranchItem } from '../../../../core/models/branch.models';
 export class BranchesComponent {
   private readonly fb = inject(FormBuilder);
   private readonly branchesService = inject(BranchesService);
+  private readonly usersService = inject(UsersService);
 
   readonly branches = signal<BranchItem[]>([]);
+  readonly users = signal<UserItem[]>([]);
+
   readonly loading = signal<boolean>(false);
   readonly saving = signal<boolean>(false);
+  readonly loadingUsers = signal<boolean>(false);
+
   readonly errorMessage = signal<string>('');
   readonly successMessage = signal<string>('');
 
   readonly showFormModal = signal<boolean>(false);
   readonly showDeleteModal = signal<boolean>(false);
+  readonly showAssignCashiersModal = signal<boolean>(false);
 
   readonly editingBranch = signal<BranchItem | null>(null);
   readonly deletingBranch = signal<BranchItem | null>(null);
+  readonly assigningBranch = signal<BranchItem | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(150)]],
@@ -31,8 +40,20 @@ export class BranchesComponent {
     phone: ['', [Validators.maxLength(20)]],
   });
 
+  readonly assignCashiersForm = this.fb.group({
+    cashierIds: this.fb.array<string>([])
+  });
+
   constructor() {
     this.loadBranches();
+  }
+
+  get cashierIdsArray(): FormArray {
+    return this.assignCashiersForm.get('cashierIds') as FormArray;
+  }
+
+  get cashiers(): UserItem[] {
+    return this.users().filter(user => user.role === 'CASHIER');
   }
 
   loadBranches(): void {
@@ -48,6 +69,25 @@ export class BranchesComponent {
         this.loading.set(false);
         this.errorMessage.set(
           error?.error?.message || 'No se pudieron cargar las sucursales.',
+        );
+      },
+    });
+  }
+
+  loadUsersForAssignment(branch: BranchItem): void {
+    this.loadingUsers.set(true);
+    this.errorMessage.set('');
+
+    this.usersService.findAll().subscribe({
+      next: (users) => {
+        this.users.set(users);
+        this.loadingUsers.set(false);
+        this.populateAssignedCashiers(branch);
+      },
+      error: (error) => {
+        this.loadingUsers.set(false);
+        this.errorMessage.set(
+          this.extractErrorMessage(error, 'No se pudieron cargar los usuarios.'),
         );
       },
     });
@@ -161,6 +201,86 @@ export class BranchesComponent {
         );
       }
     });
+  }
+
+  openAssignCashierModal(branch: BranchItem): void {
+    this.assigningBranch.set(branch);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.showAssignCashiersModal.set(true);
+    this.clearCashierSelections();
+    this.loadUsersForAssignment(branch);
+  }
+
+  closeAssignCashierModal(): void {
+    this.assigningBranch.set(null);
+    this.showAssignCashiersModal.set(false);
+    this.clearCashierSelections();
+  }
+
+  isCashierSelected(cashierId: string): boolean {
+    return this.cashierIdsArray.value.includes(cashierId);
+  }
+
+  toggleCashier(cashierId: string, checked: boolean): void {
+    const currentValues = [...this.cashierIdsArray.value];
+
+    if (checked && !currentValues.includes(cashierId)) {
+      this.cashierIdsArray.push(this.fb.control(cashierId));
+      return;
+    }
+
+    if (!checked) {
+      const index = currentValues.findIndex(id => id === cashierId);
+      if (index >= 0) {
+        this.cashierIdsArray.removeAt(index);
+      }
+    }
+  }
+
+  submitCashierSync(): void {
+    const branch = this.assigningBranch();
+
+    if (!branch || this.saving()) return;
+
+    this.saving.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    const cashierIds = (this.cashierIdsArray.value as string[]).filter(
+      (id): id is string => typeof id === 'string'
+    );
+
+    this.branchesService.assignCashiers(branch.id, { cashierIds }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.successMessage.set('Cajeros asignados correctamente.');
+        this.closeAssignCashierModal();
+        this.loadBranches();
+      },
+      error: (error) => {
+        this.saving.set(false);
+        this.errorMessage.set(
+          this.extractErrorMessage(error, 'No se pudieron asignar los cajeros.'),
+        );
+      }
+    })
+  }
+
+  private populateAssignedCashiers(branch: BranchItem): void {
+    this.clearCashierSelections();
+
+    const selectedCashiers = this.cashiers.filter(user => user.branchId === branch.id);
+
+    selectedCashiers.forEach((user) => {
+      this.cashierIdsArray.push(this.fb.control(user.id));
+    });
+  }
+
+  private clearCashierSelections(): void {
+    while (this.cashierIdsArray.length > 0) {
+      this.cashierIdsArray.removeAt(0);
+    }
   }
 
   private extractErrorMessage(error: any, fallback: string): string {
