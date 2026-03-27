@@ -1,10 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { AuthService } from '../../../../core/services/auth.service';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+
+import { AuthService } from '../../../../core/services/auth.service';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { DashboardService } from '../../../../core/services/dashboard.service';
-import { ReservationCalendarItem, ReservationDayDetailResponse } from '../../../../core/models/dashboard.models';
+import {
+  ReservationCalendarItem,
+  ReservationDayDetailResponse,
+} from '../../../../core/models/dashboard.models';
 import { BranchItem } from '../../../../core/models/branch.models';
 
 interface CalendarDayCell {
@@ -15,6 +19,7 @@ interface CalendarDayCell {
   isSelected: boolean;
   reservationCount: number;
 }
+
 @Component({
   selector: 'app-dashboard',
   imports: [CommonModule, FormsModule],
@@ -58,7 +63,6 @@ export class DashboardComponent {
     const month = current.getMonth();
 
     const firstDayOfMonth = new Date(year, month, 1);
-
     const mondayBasedOffset = (firstDayOfMonth.getDay() + 6) % 7;
     const gridStart = new Date(year, month, 1 - mondayBasedOffset);
 
@@ -66,7 +70,6 @@ export class DashboardComponent {
     const summaryMap = new Map(
       this.calendarSummary().map((item) => [item.date.split('T')[0], item.count]),
     );
-
 
     const todayStr = this.formatDate(new Date());
     const selected = this.selectedDate();
@@ -92,20 +95,6 @@ export class DashboardComponent {
   });
 
   constructor() {
-    effect(() => {
-      const user = this.authService.user();
-
-      if (!user) return;
-
-      if (user.role === 'CASHIER') {
-        this.selectedBranchId.set(user.branchId ?? null);
-        if (user.branchId) {
-          this.loadCalendar();
-          this.loadDayDetail();
-        }
-      }
-    });
-
     this.loadInitialData();
   }
 
@@ -119,10 +108,14 @@ export class DashboardComponent {
       return;
     }
 
-    if (user.role === 'CASHIER' && user.branchId) {
-      this.selectedBranchId.set(user.branchId);
-      this.loadCalendar();
-      this.loadDayDetail();
+    if (user.role === 'CASHIER') {
+      const branchId = user.branchId || user.branch?.id || null;
+      this.selectedBranchId.set(branchId);
+
+      if (branchId) {
+        this.loadCalendar();
+        this.loadDayDetail();
+      }
     }
   }
 
@@ -168,12 +161,7 @@ export class DashboardComponent {
     this.selectedBranchId.set(value);
 
     const current = this.currentDate();
-
-    const selected = new Date(
-      current.getFullYear(),
-      current.getMonth(),
-      current.getDate(),
-    );
+    const selected = new Date(current.getFullYear(), current.getMonth(), 1);
     this.selectedDate.set(this.formatDate(selected));
 
     this.loadCalendar();
@@ -181,13 +169,15 @@ export class DashboardComponent {
   }
 
   selectDay(date: string, inCurrentMonth: boolean): void {
+    if (this.selectedDate() === date && inCurrentMonth) {
+      return;
+    }
+
     this.selectedDate.set(date);
 
     if (!inCurrentMonth) {
       const target = new Date(`${date}T00:00:00`);
-      this.currentDate.set(
-        new Date(target.getFullYear(), target.getMonth(), 1),
-      );
+      this.currentDate.set(new Date(target.getFullYear(), target.getMonth(), 1));
       this.loadCalendar(() => this.loadDayDetail());
       return;
     }

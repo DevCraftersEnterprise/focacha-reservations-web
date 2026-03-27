@@ -80,11 +80,15 @@
         }
       </div>
 
-      @if (loadingCalendar()) {
-        <div class="rounded-2xl border border-dashed border-stone-300 px-4 py-14 text-center">
-          <p class="text-sm font-medium text-stone-500">Cargando calendario...</p>
-        </div>
-      } @else {
+      <div class="relative">
+        @if (loadingCalendar()) {
+          <div
+            class="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/70 backdrop-blur-[1px]"
+          >
+            <p class="text-sm font-medium text-stone-500">Actualizando calendario...</p>
+          </div>
+        }
+
         <div class="grid grid-cols-7 gap-2">
           @for (day of calendarDays(); track day.date) {
             <button
@@ -142,112 +146,124 @@
             </button>
           }
         </div>
-      }
+      </div>
     </div>
 
     <div class="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
       <div class="mb-5">
         <h3 class="text-xl font-bold text-stone-900">Detalle del día</h3>
         <p class="mt-1 text-sm text-stone-500">
-          {{ selectedDate() }}
+          {{ selectedDate() | date: 'dd/MM/yyyy' }}
         </p>
       </div>
 
-      @if (loadingDayDetail()) {
-        <div class="rounded-2xl border border-dashed border-stone-300 px-4 py-14 text-center">
-          <p class="text-sm font-medium text-stone-500">Cargando detalle...</p>
-        </div>
-      } @else if (dayDetail()) {
-        <div class="mb-5 grid grid-cols-3 gap-3">
-          <div class="rounded-2xl bg-stone-50 p-4">
-            <p class="text-xs font-semibold uppercase tracking-wide text-stone-500">Total</p>
-            <p class="mt-1 text-2xl font-bold text-stone-900">
-              {{ dayDetail()!.total }}
-            </p>
-          </div>
-
-          <div class="rounded-2xl bg-green-50 p-4">
-            <p class="text-xs font-semibold uppercase tracking-wide text-green-700">Activas</p>
-            <p class="mt-1 text-2xl font-bold text-green-800">
-              {{ dayDetail()!.activeCount }}
-            </p>
-          </div>
-
-          <div class="rounded-2xl bg-red-50 p-4">
-            <p class="text-xs font-semibold uppercase tracking-wide text-red-700">Canceladas</p>
-            <p class="mt-1 text-2xl font-bold text-red-800">
-              {{ dayDetail()!.cancelledCount }}
-            </p>
-          </div>
-        </div>
-
-        @if (dayDetail()!.items.length === 0) {
-          <div class="rounded-2xl border border-dashed border-stone-300 px-4 py-14 text-center">
-            <div
-              class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-stone-100 text-stone-400"
-            >
-              <span class="text-xl">🗓️</span>
-            </div>
-            <p class="text-sm font-medium text-stone-600">
-              No hay reservaciones registradas para este día.
-            </p>
-          </div>
-        } @else {
-          <div class="space-y-3">
-            @for (item of dayDetail()!.items; track item.id) {
-              <div class="rounded-2xl border border-stone-200 p-4 transition hover:bg-stone-50/70">
-                <div class="mb-3 flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <p class="text-sm font-bold text-stone-900">
-                      {{ formatTime(item.reservationTime) }} · {{ item.customerName }}
-                    </p>
-                    <p class="mt-1 text-xs text-stone-500">
-                      {{ item.zone?.name || 'Zona ' + item.zoneId }} · {{ item.guestCount }}
-                      {{ item.guestCount === 1 ? 'persona' : 'personas' }}
-                    </p>
-                  </div>
-
-                  <span
-                    class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
-                    [class.bg-green-100]="item.status === 'ACTIVE'"
-                    [class.text-green-800]="item.status === 'ACTIVE'"
-                    [class.bg-red-100]="item.status === 'CANCELLED'"
-                    [class.text-red-800]="item.status === 'CANCELLED'"
-                  >
-                    {{ item.status === 'ACTIVE' ? 'Activa' : 'Cancelada' }}
-                  </span>
-                </div>
-
-                <div class="space-y-1 text-sm text-stone-700">
-                  <p>
-                    <span class="font-medium">Evento:</span>
-                    {{ item.eventType }}
-                  </p>
-
-                  <p>
-                    <span class="font-medium">Teléfono principal:</span>
-                    {{ item.phonePrimary }}
-                  </p>
-
-                  @if (item.phoneSecondary) {
-                    <p>
-                      <span class="font-medium">Teléfono secundario:</span>
-                      {{ item.phoneSecondary }}
-                    </p>
-                  }
-
-                  @if (item.notes) {
-                    <p class="wrap-break-words">
-                      <span class="font-medium">Notas:</span>
-                      {{ item.notes }}
-                    </p>
-                  }
-                </div>
-              </div>
-            }
+      <div class="relative">
+        @if (loadingDayDetail()) {
+          <div
+            class="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/70 backdrop-blur-[1px]"
+          >
+            <p class="text-sm font-medium text-stone-500">Actualizando detalle...</p>
           </div>
         }
-      }
+
+        @if (dayDetail()) {
+          <div class="mb-5 grid grid-cols-3 gap-3">
+            <div class="rounded-2xl bg-stone-50 p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-stone-500">Total</p>
+              <p class="mt-1 text-2xl font-bold text-stone-900">
+                {{ dayDetail()!.total }}
+              </p>
+            </div>
+
+            <div class="rounded-2xl bg-green-50 p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-green-700">Activas</p>
+              <p class="mt-1 text-2xl font-bold text-green-800">
+                {{ dayDetail()!.activeCount }}
+              </p>
+            </div>
+
+            <div class="rounded-2xl bg-red-50 p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-red-700">Canceladas</p>
+              <p class="mt-1 text-2xl font-bold text-red-800">
+                {{ dayDetail()!.cancelledCount }}
+              </p>
+            </div>
+          </div>
+
+          @if (dayDetail()!.items.length === 0) {
+            <div class="rounded-2xl border border-dashed border-stone-300 px-4 py-14 text-center">
+              <div
+                class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-stone-100 text-stone-400"
+              >
+                <span class="text-xl">🗓️</span>
+              </div>
+              <p class="text-sm font-medium text-stone-600">
+                No hay reservaciones registradas para este día.
+              </p>
+            </div>
+          } @else {
+            <div class="space-y-3">
+              @for (item of dayDetail()!.items; track item.id) {
+                <div
+                  class="rounded-2xl border border-stone-200 p-4 transition hover:bg-stone-50/70"
+                >
+                  <div class="mb-3 flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <p class="text-sm font-bold text-stone-900">
+                        {{ formatTime(item.reservationTime) }} · {{ item.customerName }}
+                      </p>
+                      <p class="mt-1 text-xs text-stone-500">
+                        {{ item.zone?.name || 'Zona ' + item.zoneId }} · {{ item.guestCount }}
+                        {{ item.guestCount === 1 ? 'persona' : 'personas' }}
+                      </p>
+                    </div>
+
+                    <span
+                      class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
+                      [class.bg-green-100]="item.status === 'ACTIVE'"
+                      [class.text-green-800]="item.status === 'ACTIVE'"
+                      [class.bg-red-100]="item.status === 'CANCELLED'"
+                      [class.text-red-800]="item.status === 'CANCELLED'"
+                    >
+                      {{ item.status === 'ACTIVE' ? 'Activa' : 'Cancelada' }}
+                    </span>
+                  </div>
+
+                  <div class="space-y-1 text-sm text-stone-700">
+                    <p>
+                      <span class="font-medium">Evento:</span>
+                      {{ item.eventType }}
+                    </p>
+
+                    <p>
+                      <span class="font-medium">Teléfono principal:</span>
+                      {{ item.phonePrimary }}
+                    </p>
+
+                    @if (item.phoneSecondary) {
+                      <p>
+                        <span class="font-medium">Teléfono secundario:</span>
+                        {{ item.phoneSecondary }}
+                      </p>
+                    }
+
+                    @if (item.notes) {
+                      <p class="wrap-break-words">
+                        <span class="font-medium">Notas:</span>
+                        {{ item.notes }}
+                      </p>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        } @else {
+          <div class="rounded-2xl border border-dashed border-stone-300 px-4 py-14 text-center">
+            <p class="text-sm font-medium text-stone-500">Selecciona un día para ver su detalle.</p>
+          </div>
+        }
+      </div>
     </div>
   </section>
 </div>
