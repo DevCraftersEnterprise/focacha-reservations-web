@@ -94,24 +94,20 @@ export class ReservationsComponent implements OnDestroy {
     return this.currentUser()?.branchId || this.currentUser()?.branch?.id || '';
   }
 
-  private initializeCashierContext(): void {
-    if (!this.isCashier()) return;
-
-    const branchId = this.getEffectiveCashierBranchId();
-
-    if (!branchId) {
-      this.errorMessage.set('Tu usuario no tiene una sucursal asignada.');
-      return;
-    }
-
-    this.selectedBranchFilter.set(branchId);
-    this.form.controls.branchId.setValue(branchId, { emitEvent: false });
-    this.loadZonesByBranch(branchId);
-  }
-
   loadBranches(): void {
     if (this.isCashier()) {
-      this.initializeCashierContext();
+      const user = this.currentUser();
+      const branchId = user?.branchId || user?.branch?.id || '';
+
+      if (branchId) {
+        this.selectedBranchFilter.set(branchId);
+        this.form.controls.branchId.setValue(branchId, { emitEvent: false });
+        this.loadZonesByBranch(branchId); // <- esto faltaba
+      } else {
+        this.availableZones.set([]);
+        this.errorMessage.set('Tu usuario no tiene una sucursal asignada.');
+      }
+
       return;
     }
 
@@ -122,22 +118,13 @@ export class ReservationsComponent implements OnDestroy {
         this.branches.set(branches);
         this.loadingBranches.set(false);
       },
-      error: (error) => {
+      error: () => {
         this.loadingBranches.set(false);
-        this.errorMessage.set(
-          this.extractErrorMessage(error, 'No se pudieron cargar las sucursales.'),
-        );
       },
     });
   }
 
   loadZonesByBranch(branchId: string): void {
-    if (!branchId) {
-      this.availableZones.set([]);
-      this.form.controls.zoneId.setValue('', { emitEvent: false });
-      return;
-    }
-
     this.loadingZones.set(true);
 
     this.zonesService.findByBranchId(branchId).subscribe({
@@ -154,14 +141,14 @@ export class ReservationsComponent implements OnDestroy {
         }
 
         if (activeZones.length === 0) {
-          this.errorMessage.set('La sucursal seleccionada no tiene zonas activas disponibles.');
+          this.errorMessage.set('La sucursal no tiene zonas activas disponibles.');
         }
       },
       error: (error) => {
         this.availableZones.set([]);
         this.loadingZones.set(false);
         this.errorMessage.set(
-          this.extractErrorMessage(error, 'No se pudieron cargar las zonas de la sucursal.'),
+          this.extractErrorMessage(error, 'No se pudieron cargar las zonas.')
         );
       },
     });
@@ -236,15 +223,14 @@ export class ReservationsComponent implements OnDestroy {
   }
 
   openCreateModal(): void {
+    const cashierBranchId =
+      this.currentUser()?.branchId || this.currentUser()?.branch?.id || '';
+
     const initialBranchId = this.isCashier()
-      ? this.getEffectiveCashierBranchId()
+      ? cashierBranchId
       : (this.branches()[0]?.id ?? '');
 
     this.editingReservation.set(null);
-    this.errorMessage.set('');
-    this.successMessage.set('');
-    this.availableZones.set([]);
-
     this.form.reset({
       reservationDate: '',
       reservationTime: '',
@@ -258,11 +244,15 @@ export class ReservationsComponent implements OnDestroy {
       notes: '',
     });
 
-    this.showFormModal.set(true);
+    this.availableZones.set([]);
 
     if (initialBranchId) {
       this.loadZonesByBranch(initialBranchId);
     }
+
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.showFormModal.set(true);
   }
 
   openEditModal(reservation: ReservationItem): void {
