@@ -7,7 +7,7 @@ import { CreateZoneRequest, UpdateZoneRequest, ZoneItem } from '../models/zone.m
 @Injectable({
   providedIn: 'root'
 })
-export class Zones {
+export class ZonesService {
 
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
