@@ -136,3 +136,159 @@
     }
   </section>
 </div>
+
+@if (showFormModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
+    <div class="w-full max-w-xl rounded-2xl bg-white shadow-xl">
+      <div class="flex items-center justify-between border-b border-stone-200 px-6 py-4">
+        <div>
+          <h3 class="text-lg font-bold text-stone-900">
+            {{ isEditing() ? 'Editar usuario' : 'Nuevo usuario' }}
+          </h3>
+          <p class="text-sm text-stone-500">Captura la información de acceso y asignación.</p>
+        </div>
+
+        <button
+          type="button"
+          class="rounded-lg px-3 py-2 text-stone-500 transition hover:bg-stone-100 cursor-pointer"
+          (click)="closeFormModal()"
+        >
+          X
+        </button>
+      </div>
+
+      <form class="space-y-4 px-6 py-6" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-stone-700">Nombre</label>
+            <input
+              type="text"
+              formControlName="firstName"
+              class="w-full rounded-xl border px-4 py-3 outline-none transition"
+              [class.border-red-400]="
+                form.controls.firstName.invalid && form.controls.firstName.touched
+              "
+              [class.border-stone-300]="
+                !(form.controls.firstName.invalid && form.controls.firstName.touched)
+              "
+              placeholder="Juan"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-stone-700">Apellido</label>
+            <input
+              type="text"
+              formControlName="lastName"
+              class="w-full rounded-xl border px-4 py-3 outline-none transition"
+              [class.border-red-400]="
+                form.controls.lastName.invalid && form.controls.lastName.touched
+              "
+              [class.border-stone-300]="
+                !(form.controls.lastName.invalid && form.controls.lastName.touched)
+              "
+              placeholder="Pérez"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-stone-700">Correo</label>
+            <input
+              type="email"
+              formControlName="email"
+              class="w-full rounded-xl border px-4 py-3 outline-none transition"
+              [class.border-red-400]="form.controls.email.invalid && form.controls.email.touched"
+              [class.border-stone-300]="
+                !(form.controls.email.invalid && form.controls.email.touched)
+              "
+              placeholder="correo@ejemplo.com"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-stone-700">
+              {{ isEditing() ? 'Nueva contraseña (opcional)' : 'Contraseña' }}
+            </label>
+            <input
+              type="password"
+              formControlName="password"
+              class="w-full rounded-xl border px-4 py-3 outline-none transition"
+              [class.border-red-400]="
+                form.controls.password.invalid && form.controls.password.touched
+              "
+              [class.border-stone-300]="
+                !(form.controls.password.invalid && form.controls.password.touched)
+              "
+              placeholder="••••••••"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-stone-700">Rol</label>
+            <select
+              formControlName="role"
+              class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none transition"
+            >
+              @for (role of availableRoles; track role) {
+                <option [value]="role">{{ role }}</option>
+              }
+            </select>
+          </div>
+
+          @if (showBranchesField()) {
+            <div>
+              <label class="mb-1 block text-sm font-medium text-stone-700">Sucursal</label>
+              <select
+                formControlName="branchId"
+                class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none transition"
+              >
+                <option [value]="null">Selecciona una sucursal</option>
+                @for (branch of branches(); track branch.id) {
+                  <option [value]="branch.id">{{ branch.name }}</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+
+        @if (isEditing()) {
+          <div
+            class="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3"
+          >
+            <input
+              id="isActive"
+              type="checkbox"
+              formControlName="isActive"
+              class="h-4 w-4 rounded border-stone-300"
+            />
+            <label for="isActive" class="text-sm font-medium text-stone-700">
+              Usuario activo
+            </label>
+          </div>
+        }
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            class="rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
+            (click)="closeFormModal()"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            [disabled]="saving()"
+          >
+            {{ saving() ? 'Guardando ...' : isEditing() ? 'Actualizar' : 'Crear' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
