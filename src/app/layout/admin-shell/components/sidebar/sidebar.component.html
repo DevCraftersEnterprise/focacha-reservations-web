@@ -1,30 +1,43 @@
 <aside class="flex h-full w-full flex-col border-r border-stone-200 bg-white">
-  <div class="border-b border-stone-200 px-6 py-4">
-    <h2 class="text-lg font-bold text-[#1F1A17]">Reservaciones</h2>
-    <p class="text-sm text-stone-500">Panel administrativo</p>
+  <div class="border-b border-stone-200 px-4 sm:px-6 py-3 sm:py-4">
+    <div class="flex items-center gap-2">
+      <lucide-icon [img]="iconsService.calendar" class="h-5 w-5 text-[#8B1E1E]" />
+      <div>
+        <h2 class="text-base sm:text-lg font-bold text-[#1F1A17]">Reservaciones</h2>
+        <p class="text-xs sm:text-sm text-stone-500">Panel administrativo</p>
+      </div>
+    </div>
   </div>
 
-  <nav class="flex-1 space-y-2 p-4">
+  <nav class="flex-1 space-y-1 sm:space-y-2 p-3 sm:p-4">
     @for (item of menuItems(); track item.route) {
       <a
         [routerLink]="item.route"
         routerLinkActive="bg-[#8B1E1E] text-white"
-        class="block rounded-xl px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-[#8B1E1E] hover:text-white"
+        class="flex items-center gap-2 sm:gap-3 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-stone-700 transition hover:bg-[#8B1E1E] hover:text-white"
         (click)="itemClick.emit()"
       >
-        {{ item.label }}
+        <lucide-icon [img]="item.icon" class="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+        <span>{{ item.label }}</span>
       </a>
     }
   </nav>
 
-  <div class="border-t border-stone-200 p-4">
-    <div class="rounded-xl bg-stone-50 px-4 py-3">
-      <p class="text-sm font-semibold text-stone-800">
-        {{ authService.user()?.firstName }} {{ authService.user()?.lastName }}
-      </p>
-      <p class="text-xs uppercase tracking-wide text-stone-500">
-        {{ authService.user()?.role }}
-      </p>
+  <div class="border-t border-stone-200 p-3 sm:p-4">
+    <div class="flex items-center gap-2 sm:gap-3">
+      <div
+        class="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-[#8B1E1E]"
+      >
+        <lucide-icon [img]="iconsService.userRound" class="h-5 w-5 sm:h-5 sm:w-5 text-white" />
+      </div>
+      <div class="min-w-0 flex-1">
+        <p class="truncate text-xs sm:text-sm font-semibold text-stone-800">
+          {{ authService.user()?.firstName }} {{ authService.user()?.lastName }}
+        </p>
+        <p class="text-[10px] sm:text-xs uppercase tracking-wide text-stone-500">
+          {{ authService.user()?.role }}
+        </p>
+      </div>
     </div>
   </div>
 </aside>

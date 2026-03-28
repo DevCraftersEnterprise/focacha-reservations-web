@@ -22,9 +22,10 @@
 
   <button
     type="button"
-    class="rounded-xl border border-stone-300 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
+    class="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-stone-300 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
     (click)="authService.logout()"
   >
+    <lucide-icon [img]="iconsService.logOut" class="h-4 w-4" />
     <span class="hidden sm:inline">Cerrar sesión</span>
     <span class="sm:hidden">Salir</span>
   </button>
