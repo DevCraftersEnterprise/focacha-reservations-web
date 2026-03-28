@@ -1,29 +1,38 @@
-<div class="space-y-6">
-  <section class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+<div class="space-y-4 sm:space-y-6">
+  <section class="rounded-2xl border border-stone-200 bg-white p-4 sm:p-6 shadow-sm">
+    <div class="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <h2 class="text-2xl font-bold text-stone-900">Usuarios</h2>
-        <p class="mt-1 text-sm text-stone-500">Administra los usuarios de la aplicación.</p>
+        <h2 class="flex items-center gap-2 text-xl sm:text-2xl font-bold text-stone-900">
+          <lucide-icon [img]="iconsService.users" class="h-5 w-5 sm:h-6 sm:w-6" />
+          <span>Usuarios</span>
+        </h2>
+        <p class="mt-1 text-xs sm:text-sm text-stone-500">
+          Administra los usuarios de la aplicación.
+        </p>
       </div>
 
       <button
         type="button"
-        class="inline-flex items-center justify-center rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 cursor-pointer"
+        class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#8B1E1E] px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-semibold text-white transition hover:opacity-90 cursor-pointer"
         (click)="openCreateModal()"
       >
-        Nuevo usuario
+        <lucide-icon [img]="iconsService.plus" class="h-4 w-4" />
+        <span class="hidden sm:inline">Nuevo usuario</span>
+        <span class="sm:hidden">Nuevo</span>
       </button>
     </div>
 
     @if (errorMessage()) {
-      <div class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <div
+        class="mt-3 sm:mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-red-700"
+      >
         {{ errorMessage() }}
       </div>
     }
 
     @if (successMessage()) {
       <div
-        class="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+        class="mt-3 sm:mt-4 rounded-xl border border-green-200 bg-green-50 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-green-700"
       >
         {{ successMessage() }}
       </div>
@@ -32,11 +41,16 @@
 
   <section class="rounded-2xl border border-stone-200 bg-white shadow-sm">
     @if (loading()) {
-      <div class="px-6 py-10 text-center text-sm text-stone-500">Cargando usuarios...</div>
-    } @else if (branches().length === 0) {
-      <div class="px-6 py-10 text-center text-sm text-stone-500">No hay usuarios registrados.</div>
+      <div class="px-4 py-8 sm:px-6 sm:py-10 text-center text-xs sm:text-sm text-stone-500">
+        Cargando usuarios...
+      </div>
+    } @else if (users().length === 0) {
+      <div class="px-4 py-8 sm:px-6 sm:py-10 text-center text-xs sm:text-sm text-stone-500">
+        No hay usuarios registrados.
+      </div>
     } @else {
-      <div class="overflow-x-auto">
+      <!-- Vista de tabla (desktop) -->
+      <div class="hidden lg:block overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200">
           <thead class="bg-stone-50">
             <tr>
@@ -133,31 +147,111 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Vista de cards (mobile/tablet) -->
+      <div class="lg:hidden divide-y divide-stone-100">
+        @for (user of users(); track user.id) {
+          <div class="p-4 hover:bg-stone-50 transition">
+            <div class="mb-3 flex items-start justify-between gap-2">
+              <div>
+                <p class="flex items-center gap-2 text-base font-bold text-stone-900">
+                  <lucide-icon [img]="iconsService.userRound" class="h-4 w-4 shrink-0" />
+                  <span>{{ user.firstName }} {{ user.lastName }}</span>
+                </p>
+                <p class="mt-1 text-sm text-stone-600">{{ user.email }}</p>
+              </div>
+
+              <span
+                class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
+                [class.bg-green-100]="user.isActive"
+                [class.text-green-800]="user.isActive"
+                [class.bg-red-100]="!user.isActive"
+                [class.text-red-800]="!user.isActive"
+              >
+                {{ user.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+
+            <div class="space-y-2 mb-4 text-sm text-stone-600">
+              <p class="flex items-center gap-2">
+                <lucide-icon [img]="iconsService.tag" class="h-4 w-4 shrink-0" />
+                <span
+                  class="rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                  [class.bg-[#F7F3EE]]="user.role === 'ADMIN'"
+                  [class.text-[#8B1E1E]]="user.role === 'ADMIN'"
+                  [class.bg-stone-100]="user.role === 'CASHIER'"
+                  [class.text-stone-700]="user.role === 'CASHIER'"
+                >
+                  {{ user.role }}
+                </span>
+              </p>
+
+              <p class="flex items-center gap-2">
+                <lucide-icon [img]="iconsService.building2" class="h-4 w-4 shrink-0" />
+                <span>{{ user.branch?.name || '-' }}</span>
+              </p>
+            </div>
+
+            <div class="flex gap-2">
+              <button
+                type="button"
+                class="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-stone-300 px-3 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
+                (click)="openEditModal(user)"
+              >
+                <lucide-icon [img]="iconsService.pencil" class="h-3.5 w-3.5" />
+                <span>Editar</span>
+              </button>
+
+              <button
+                type="button"
+                class="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-red-300 px-3 py-2 text-xs font-medium text-red-700 transition hover:bg-red-50 cursor-pointer"
+                (click)="openDeleteModal(user)"
+              >
+                <lucide-icon [img]="iconsService.circleX" class="h-3.5 w-3.5" />
+                <span>Eliminar</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
     }
   </section>
 </div>
 
 @if (showFormModal()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
-    <div class="w-full max-w-xl rounded-2xl bg-white shadow-xl">
-      <div class="flex items-center justify-between border-b border-stone-200 px-6 py-4">
-        <div>
-          <h3 class="text-lg font-bold text-stone-900">
-            {{ isEditing() ? 'Editar usuario' : 'Nuevo usuario' }}
-          </h3>
-          <p class="text-sm text-stone-500">Captura la información de acceso y asignación.</p>
+    <div
+      class="w-full max-w-xl max-h-[calc(100vh-2rem)] rounded-2xl bg-white shadow-xl flex flex-col"
+    >
+      <div
+        class="shrink-0 flex items-center justify-between border-b border-stone-200 px-4 sm:px-6 py-3 sm:py-4"
+      >
+        <div class="flex items-center gap-2">
+          <lucide-icon [img]="iconsService.userRound" class="h-5 w-5 text-[#8B1E1E]" />
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-stone-900">
+              {{ isEditing() ? 'Editar usuario' : 'Nuevo usuario' }}
+            </h3>
+            <p class="text-xs sm:text-sm text-stone-500">
+              Captura la información de acceso y asignación.
+            </p>
+          </div>
         </div>
 
         <button
           type="button"
-          class="rounded-lg px-3 py-2 text-stone-500 transition hover:bg-stone-100 cursor-pointer"
+          class="shrink-0 rounded-lg p-2 text-stone-500 transition hover:bg-stone-100 cursor-pointer"
           (click)="closeFormModal()"
         >
-          X
+          <lucide-icon [img]="iconsService.iconX" class="h-4 w-4" />
         </button>
       </div>
 
-      <form class="space-y-4 px-6 py-6" [formGroup]="form" (ngSubmit)="submit()">
+      <form
+        class="flex-1 overflow-y-auto space-y-4 px-4 sm:px-6 py-4 sm:py-6"
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+      >
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label class="mb-1 block text-sm font-medium text-stone-700">Nombre</label>
@@ -271,10 +365,12 @@
           </div>
         }
 
-        <div class="flex justify-end gap-3 pt-2">
+        <div
+          class="shrink-0 flex justify-end gap-2 sm:gap-3 pt-2 border-t border-stone-100 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 bg-stone-50"
+        >
           <button
             type="button"
-            class="rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
+            class="rounded-xl border border-stone-300 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
             (click)="closeFormModal()"
           >
             Cancelar
@@ -282,10 +378,11 @@
 
           <button
             type="submit"
-            class="rounded-xl bg-[#8B1E1E] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+            class="flex items-center gap-1.5 rounded-xl bg-[#8B1E1E] px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             [disabled]="saving()"
           >
-            {{ saving() ? 'Guardando ...' : isEditing() ? 'Actualizar' : 'Crear' }}
+            <lucide-icon [img]="iconsService.save" class="h-3.5 w-3.5" />
+            <span>{{ saving() ? 'Guardando ...' : isEditing() ? 'Actualizar' : 'Crear' }}</span>
           </button>
         </div>
       </form>
@@ -296,13 +393,18 @@
 @if (showDeleteModal()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
     <div class="w-full max-w-md rounded-2xl bg-white shadow-xl">
-      <div class="border-b border-stone-200 px-6 py-4">
-        <h3 class="text-lg font-bold text-stone-900">Eliminar usuario</h3>
-        <p class="text-sm text-stone-500">Esta acción no se puede deshacer.</p>
+      <div class="border-b border-stone-200 px-4 sm:px-6 py-3 sm:py-4">
+        <div class="flex items-center gap-2">
+          <lucide-icon [img]="iconsService.alertTriangle" class="h-5 w-5 text-red-600" />
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-stone-900">Eliminar usuario</h3>
+            <p class="text-xs sm:text-sm text-stone-500">Esta acción no se puede deshacer.</p>
+          </div>
+        </div>
       </div>
 
-      <div class="px-6 py-5">
-        <p class="text-sm text-stone-700">
+      <div class="px-4 sm:px-6 py-4 sm:py-5">
+        <p class="text-xs sm:text-sm text-stone-700">
           ¿Seguro de que deseas eliminar el usuario
           <span class="font-semibold"
             >{{ deletingUser()?.firstName }} {{ deletingUser()?.lastName }}</span
@@ -310,10 +412,12 @@
         </p>
       </div>
 
-      <div class="flex justify-end gap-3 border-t border-stone-200 px-6 py-4">
+      <div
+        class="flex justify-end gap-2 sm:gap-3 border-t border-stone-200 px-4 sm:px-6 py-3 sm:py-4"
+      >
         <button
           type="button"
-          class="rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
+          class="rounded-xl border border-stone-300 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
           (click)="closeDeleteModal()"
         >
           Cancelar
@@ -321,11 +425,12 @@
 
         <button
           type="submit"
-          class="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+          class="flex items-center gap-1.5 rounded-xl bg-red-600 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           [disabled]="saving()"
           (click)="confirmDelete()"
         >
-          {{ saving() ? 'Eliminando...' : 'Eliminar' }}
+          <lucide-icon [img]="iconsService.circleX" class="h-3.5 w-3.5" />
+          <span>{{ saving() ? 'Eliminando...' : 'Eliminar' }}</span>
         </button>
       </div>
     </div>

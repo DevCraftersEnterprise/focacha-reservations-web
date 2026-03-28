@@ -1,20 +1,23 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { BranchItem } from '../../../../core/models/branch.models';
 import { UsersService } from '../../../../core/services/users.service';
 import { UserItem } from '../../../../core/models/user.models';
+import { IconsService } from '../../../../core/services/icons.service';
 
 @Component({
   selector: 'app-branches',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
   templateUrl: './branches.component.html',
 })
 export class BranchesComponent {
   private readonly fb = inject(FormBuilder);
   private readonly branchesService = inject(BranchesService);
   private readonly usersService = inject(UsersService);
+  readonly iconsService = inject(IconsService);
 
   readonly branches = signal<BranchItem[]>([]);
   readonly users = signal<UserItem[]>([]);

@@ -1,20 +1,23 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
 import { ZonesService } from '../../../../core/services/zones.service';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { ZoneItem } from '../../../../core/models/zone.models';
 import { BranchItem } from '../../../../core/models/branch.models';
+import { IconsService } from '../../../../core/services/icons.service';
 
 @Component({
   selector: 'app-zones',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
   templateUrl: './zones.component.html',
 })
 export class ZonesComponent {
   private readonly fb = inject(FormBuilder);
   private readonly zonesService = inject(ZonesService);
   private readonly branchesService = inject(BranchesService);
+  readonly iconsService = inject(IconsService);
 
   readonly zones = signal<ZoneItem[]>([]);
   readonly branches = signal<BranchItem[]>([]);

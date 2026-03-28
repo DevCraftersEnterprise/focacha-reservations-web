@@ -1,50 +1,62 @@
-<div class="flex min-h-screen items-center justify-center bg-[#FFFDFC] px-4">
-  <div class="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
-    <h1 class="mb-2 text-2xl font-bold text-stone-900">Iniciar sesión</h1>
-    <p class="mb-6 text-sm text-shadow-stone-500">Sistema de reservaciones del restaurante</p>
+<div class="flex min-h-screen items-center justify-center bg-[#FFFDFC] px-4 py-6">
+  <div class="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-6 sm:p-8 shadow-sm">
+    <h1 class="mb-2 text-xl sm:text-2xl font-bold text-stone-900">Iniciar sesión</h1>
+    <p class="mb-4 sm:mb-6 text-xs sm:text-sm text-stone-500">
+      Sistema de reservaciones del restaurante
+    </p>
 
     <form class="space-y-4" [formGroup]="form" (ngSubmit)="submit()">
       <div>
-        <label class="mb-1 block text-sm font-medium text-stone-700">Correo</label>
+        <label class="mb-1 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-700">
+          <lucide-icon [img]="iconsService.userRound" class="h-3.5 w-3.5" />
+          <span>Correo</span>
+        </label>
         <input
           type="email"
           formControlName="email"
-          class="w-full rounded-xl border px-4 py-3 outline-none transition"
+          class="w-full rounded-xl border px-3 sm:px-4 py-2.5 sm:py-3 text-sm outline-none transition"
           [class.border-red-400]="emailControl.invalid && emailControl.touched"
           [class.border-stone-300]="!(emailControl.invalid && emailControl.touched)"
           placeholder="correo@ejemplo.com"
         />
 
         @if (emailControl.invalid && emailControl.touched) {
-          <p class="mt-1 text-sm text-red-600">Ingresa un correo válido.</p>
+          <p class="mt-1 text-xs sm:text-sm text-red-600">Ingresa un correo válido.</p>
         }
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-stone-700">Contraseña</label>
+        <label class="mb-1 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-700">
+          <lucide-icon [img]="iconsService.notebookPen" class="h-3.5 w-3.5" />
+          <span>Contraseña</span>
+        </label>
         <input
           type="password"
           formControlName="password"
-          class="w-full rounded-xl border px-4 py-3 outline-none transition"
+          class="w-full rounded-xl border px-3 sm:px-4 py-2.5 sm:py-3 text-sm outline-none transition"
           [class.border-red-400]="passwordControl.invalid && passwordControl.touched"
           [class.border-stone-300]="!(passwordControl.invalid && passwordControl.touched)"
           placeholder="••••••••"
         />
 
         @if (passwordControl.invalid && passwordControl.touched) {
-          <p class="mt-1 text-sm text-red-600">La contraseña debe tener al menos 6 caracteres.</p>
+          <p class="mt-1 text-xs sm:text-sm text-red-600">
+            La contraseña debe tener al menos 6 caracteres.
+          </p>
         }
       </div>
 
       @if (errorMessage()) {
-        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div
+          class="rounded-xl border border-red-200 bg-red-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-red-700"
+        >
           {{ errorMessage() }}
         </div>
       }
 
       <button
         type="submit"
-        class="w-full rounded-xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        class="w-full rounded-xl bg-stone-900 px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         [disabled]="loading()"
       >
         {{ loading() ? 'Entrando...' : 'Entrar' }}
