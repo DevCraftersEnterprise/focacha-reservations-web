@@ -2,7 +2,10 @@ import { Injectable } from '@angular/core';
 import {
   LucideAlertTriangle,
   LucideBuilding2,
+  LucideCalendar,
   LucideCalendarDays,
+  LucideChevronLeft,
+  LucideChevronRight,
   LucideCircleX,
   LucideClock3,
   LucideEraser,
@@ -24,7 +27,10 @@ import {
 export class IconsService {
   readonly alertTriangle = LucideAlertTriangle;
   readonly building2 = LucideBuilding2;
+  readonly calendar = LucideCalendar;
   readonly calendarDay = LucideCalendarDays;
+  readonly chevronLeft = LucideChevronLeft;
+  readonly chevronRight = LucideChevronRight;
   readonly circleX = LucideCircleX;
   readonly clock3 = LucideClock3;
   readonly eraser = LucideEraser;

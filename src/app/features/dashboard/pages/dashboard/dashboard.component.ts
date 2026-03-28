@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
 
 import { AuthService } from '../../../../core/services/auth.service';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { DashboardService } from '../../../../core/services/dashboard.service';
+import { IconsService } from '../../../../core/services/icons.service';
 import {
   ReservationCalendarItem,
   ReservationDayDetailResponse,
@@ -22,12 +24,13 @@ interface CalendarDayCell {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent {
   readonly authService = inject(AuthService);
+  readonly iconsService = inject(IconsService);
   private readonly branchesService = inject(BranchesService);
   private readonly dashboardService = inject(DashboardService);
 
