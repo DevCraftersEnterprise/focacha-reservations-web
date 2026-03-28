@@ -2,19 +2,23 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-
 import { ReservationsService } from '../../../../core/services/reservations.service';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { ZonesService } from '../../../../core/services/zones.service';
 import { AuthService } from '../../../../core/services/auth.service';
-
 import { ReservationItem, ReservationStatus } from '../../../../core/models/reservation.models';
 import { BranchItem } from '../../../../core/models/branch.models';
 import { ZoneItem } from '../../../../core/models/zone.models';
+import { LucideAngularModule } from 'lucide-angular';
+import { IconsService } from '../../../../core/services/icons.service';
 
 @Component({
   selector: 'app-reservations',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LucideAngularModule,
+  ],
   templateUrl: './reservations.component.html',
 })
 export class ReservationsComponent implements OnDestroy {
@@ -24,6 +28,7 @@ export class ReservationsComponent implements OnDestroy {
   private readonly reservationsService = inject(ReservationsService);
   private readonly branchesService = inject(BranchesService);
   private readonly zonesService = inject(ZonesService);
+  protected readonly iconsService = inject(IconsService);
   readonly authService = inject(AuthService);
 
   readonly reservations = signal<ReservationItem[]>([]);

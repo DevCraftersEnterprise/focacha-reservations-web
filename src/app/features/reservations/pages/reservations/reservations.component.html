@@ -1,9 +1,9 @@
-<div class="space-y-6">
-  <section class="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
-    <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+<div class="space-y-4 md:space-y-6">
+  <section class="rounded-2xl md:rounded-3xl border border-stone-200 bg-white p-4 md:p-6 shadow-sm">
+    <div class="flex flex-col gap-4 md:gap-5 xl:flex-row xl:items-end xl:justify-between">
       <div>
-        <h2 class="text-2xl font-bold tracking-tight text-stone-900">Reservaciones</h2>
-        <p class="mt-1 text-sm text-stone-500">
+        <h2 class="text-xl md:text-2xl font-bold tracking-tight text-stone-900">Reservaciones</h2>
+        <p class="mt-1 text-xs md:text-sm text-stone-500">
           Administra las reservaciones registradas en el sistema.
         </p>
       </div>
@@ -56,10 +56,10 @@
           </select>
         </div>
 
-        <div class="flex gap-3">
+        <div class="flex gap-2 md:gap-3 sm:col-span-2 xl:col-span-1">
           <button
             type="button"
-            class="rounded-2xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
+            class="rounded-2xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer whitespace-nowrap"
             (click)="clearFilters()"
           >
             Limpiar
@@ -67,10 +67,14 @@
 
           <button
             type="button"
-            class="rounded-2xl bg-[#8B1E1E] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 cursor-pointer"
+            class="flex-1 sm:flex-none rounded-2xl bg-[#8B1E1E] px-4 md:px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 cursor-pointer"
             (click)="openCreateModal()"
           >
-            Nueva reservación
+            <div class="flex items-center justify-center">
+              <lucide-icon [img]="iconsService.plus" class="h-4 w-4" />
+              <span class="ml-1.5 hidden sm:inline">Nueva reservación</span>
+              <span class="ml-1.5 sm:hidden">Nueva</span>
+            </div>
           </button>
         </div>
       </div>
@@ -91,24 +95,27 @@
     }
   </section>
 
-  <section class="rounded-3xl border border-stone-200 bg-white shadow-sm overflow-hidden">
+  <section
+    class="rounded-2xl md:rounded-3xl border border-stone-200 bg-white shadow-sm overflow-hidden"
+  >
     @if (loading()) {
-      <div class="px-6 py-14 text-center">
+      <div class="px-4 md:px-6 py-10 md:py-14 text-center">
         <p class="text-sm font-medium text-stone-500">Cargando reservaciones...</p>
       </div>
     } @else if (reservations().length === 0) {
-      <div class="px-6 py-14 text-center">
+      <div class="px-4 md:px-6 py-10 md:py-14 text-center">
         <div
-          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-stone-100 text-stone-400"
+          class="mx-auto mb-4 flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-full bg-stone-100 text-stone-400"
         >
-          <span class="text-xl">📅</span>
+          <span class="text-lg md:text-xl">📅</span>
         </div>
         <p class="text-sm font-medium text-stone-600">
           No hay reservaciones registradas para el filtro actual.
         </p>
       </div>
     } @else {
-      <div class="overflow-x-auto">
+      <!-- Vista de tabla para desktop -->
+      <div class="hidden lg:block overflow-x-auto">
         <table class="min-w-full divide-y divide-stone-200">
           <thead class="bg-stone-50/80">
             <tr>
@@ -235,18 +242,26 @@
                     @if (reservation.status === 'ACTIVE') {
                       <button
                         type="button"
-                        class="rounded-2xl border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
+                        class="rounded-2xl border border-stone-300 px-3 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
                         (click)="openEditModal(reservation)"
+                        title="Editar"
                       >
-                        Editar
+                        <div class="flex items-center">
+                          <lucide-icon [img]="iconsService.pencil" class="h-4 w-4" />
+                          <span class="ml-1 hidden xl:inline">Editar</span>
+                        </div>
                       </button>
 
                       <button
                         type="button"
-                        class="rounded-2xl border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 cursor-pointer"
+                        class="rounded-2xl border border-red-300 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 cursor-pointer"
                         (click)="openCancelModal(reservation)"
+                        title="Cancelar"
                       >
-                        Cancelar
+                        <div class="flex items-center">
+                          <lucide-icon [img]="iconsService.circleX" class="h-4 w-4" />
+                          <span class="ml-1 hidden xl:inline">Cancelar</span>
+                        </div>
                       </button>
                     }
                   </div>
@@ -256,315 +271,594 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Vista de cards para móvil y tablet -->
+      <div class="lg:hidden divide-y divide-stone-100">
+        @for (reservation of reservations(); track reservation.id) {
+          <div class="p-4 md:p-5 hover:bg-stone-50/70 transition">
+            <div class="space-y-3">
+              <!-- Encabezado del card -->
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                  <p class="font-semibold text-stone-900 text-sm md:text-base truncate">
+                    {{ reservation.customerName }}
+                  </p>
+                  <div
+                    class="flex flex-wrap items-center gap-1.5 mt-1 text-xs md:text-sm text-stone-500"
+                  >
+                    <span>{{ reservation.reservationDate | date: 'dd/MM/yyyy' }}</span>
+                    <span class="text-stone-300">•</span>
+                    <span>{{ formatTime(reservation.reservationTime) }}</span>
+                  </div>
+                </div>
+                <span
+                  class="rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap"
+                  [class.bg-green-100]="reservation.status === 'ACTIVE'"
+                  [class.text-green-800]="reservation.status === 'ACTIVE'"
+                  [class.bg-red-100]="reservation.status === 'CANCELLED'"
+                  [class.text-red-800]="reservation.status === 'CANCELLED'"
+                >
+                  {{ reservation.status === 'ACTIVE' ? 'Activa' : 'Cancelada' }}
+                </span>
+              </div>
+
+              <!-- Detalles -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-sm">
+                <div class="flex items-start gap-2">
+                  <lucide-icon
+                    [img]="iconsService.building2"
+                    class="h-4 w-4 text-stone-400 mt-0.5"
+                  />
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs text-stone-500">Sucursal</p>
+                    <p class="font-medium text-stone-800 truncate">
+                      {{ reservation.branch?.name || 'Sucursal ' + reservation.branchId }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-2">
+                  <lucide-icon
+                    [img]="iconsService.mapPinned"
+                    class="h-4 w-4 text-stone-400 mt-0.5"
+                  />
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs text-stone-500">Zona</p>
+                    <p class="font-medium text-stone-800 truncate">
+                      {{ reservation.zone?.name || 'Zona ' + reservation.zoneId }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-2">
+                  <lucide-icon [img]="iconsService.users" class="h-4 w-4 text-stone-400 mt-0.5" />
+                  <div>
+                    <p class="text-xs text-stone-500">Personas</p>
+                    <p class="font-semibold text-stone-800">{{ reservation.guestCount }}</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-2">
+                  <lucide-icon [img]="iconsService.tag" class="h-4 w-4 text-stone-400 mt-0.5" />
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs text-stone-500">Evento</p>
+                    <p class="font-medium text-stone-800 truncate">{{ reservation.eventType }}</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-2 sm:col-span-2">
+                  <lucide-icon [img]="iconsService.phone" class="h-4 w-4 text-stone-400 mt-0.5" />
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs text-stone-500">Teléfono</p>
+                    <div class="space-y-0.5">
+                      <p class="font-medium text-stone-800">{{ reservation.phonePrimary }}</p>
+                      @if (reservation.phoneSecondary) {
+                        <p class="text-stone-600">{{ reservation.phoneSecondary }}</p>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                @if (reservation.notes) {
+                  <div class="flex items-start gap-2 sm:col-span-2">
+                    <lucide-icon
+                      [img]="iconsService.notebookPen"
+                      class="h-4 w-4 text-stone-400 mt-0.5"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <p class="text-xs text-stone-500">Notas</p>
+                      <p class="text-stone-600 line-clamp-2" [title]="reservation.notes">
+                        {{ reservation.notes }}
+                      </p>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Acciones -->
+              @if (reservation.status === 'ACTIVE') {
+                <div class="flex gap-2 pt-1">
+                  <button
+                    type="button"
+                    class="flex-1 sm:flex-none rounded-2xl border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
+                    (click)="openEditModal(reservation)"
+                  >
+                    <div class="flex items-center justify-center">
+                      <lucide-icon [img]="iconsService.pencil" class="h-4 w-4 mr-1.5" />
+                      Editar
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="flex-1 sm:flex-none rounded-2xl border border-red-300 px-4 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-50 cursor-pointer"
+                    (click)="openCancelModal(reservation)"
+                  >
+                    <div class="flex items-center justify-center">
+                      <lucide-icon [img]="iconsService.circleX" class="h-4 w-4 mr-1.5" />
+                      Cancelar
+                    </div>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
     }
   </section>
 </div>
 
 @if (showFormModal()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
-    <div class="w-full max-w-5xl rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-start justify-between border-b border-stone-200 px-6 py-5">
-        <div>
-          <h3 class="text-2xl font-bold text-stone-900">
-            {{ editingReservation() ? 'Editar reservación' : 'Nueva reservación' }}
-          </h3>
-          <p class="mt-1 text-sm text-stone-500">
-            Captura la información del cliente y del evento.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          class="rounded-xl px-3 py-2 text-stone-500 transition hover:bg-stone-100 cursor-pointer"
-          (click)="closeFormModal()"
-        >
-          X
-        </button>
-      </div>
-
-      <form class="space-y-6 px-6 py-6" [formGroup]="form" (ngSubmit)="submit()">
-        <section class="space-y-4">
-          <div>
-            <h4 class="text-sm font-semibold uppercase tracking-wide text-stone-500">
-              Datos de la reservación
-            </h4>
+  <div
+    class="fixed inset-0 z-50 bg-black/45 flex items-center justify-center p-0 sm:p-3 md:p-6 lg:p-8"
+  >
+    <div
+      class="w-full h-full sm:h-auto sm:max-h-[calc(100vh-3rem)] md:max-h-[calc(100vh-6rem)] sm:max-w-4xl flex flex-col overflow-hidden rounded-none sm:rounded-2xl md:rounded-3xl border-0 sm:border border-stone-200 bg-white shadow-2xl"
+    >
+      <div
+        class="shrink-0 sticky top-0 z-10 border-b border-stone-200 bg-white/95 px-3 py-2.5 backdrop-blur sm:px-4 sm:py-3 md:px-6 md:py-4"
+      >
+        <div class="flex items-start justify-between gap-2 sm:gap-3">
+          <div class="flex-1 min-w-0">
+            <h3 class="text-base sm:text-lg md:text-2xl font-bold text-stone-900 truncate">
+              {{ editingReservation() ? 'Editar reservación' : 'Nueva reservación' }}
+            </h3>
+            <p class="mt-0.5 text-xs sm:text-sm text-stone-500">
+              Captura la información del cliente y del evento.
+            </p>
           </div>
 
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-stone-700">Fecha</label>
-              <input
-                type="date"
-                formControlName="reservationDate"
-                class="w-full rounded-2xl border px-4 py-3 outline-none transition"
-                [class.border-red-400]="
-                  form.controls.reservationDate.invalid && form.controls.reservationDate.touched
-                "
-                [class.border-stone-300]="
-                  !(form.controls.reservationDate.invalid && form.controls.reservationDate.touched)
-                "
-              />
-            </div>
-
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-stone-700">Hora</label>
-              <input
-                type="time"
-                formControlName="reservationTime"
-                class="w-full rounded-2xl border px-4 py-3 outline-none transition"
-                [class.border-red-400]="
-                  form.controls.reservationTime.invalid && form.controls.reservationTime.touched
-                "
-                [class.border-stone-300]="
-                  !(form.controls.reservationTime.invalid && form.controls.reservationTime.touched)
-                "
-              />
-            </div>
-
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-stone-700">Personas</label>
-              <input
-                type="number"
-                min="1"
-                formControlName="guestCount"
-                class="w-full rounded-2xl border px-4 py-3 outline-none transition"
-                [class.border-red-400]="
-                  form.controls.guestCount.invalid && form.controls.guestCount.touched
-                "
-                [class.border-stone-300]="
-                  !(form.controls.guestCount.invalid && form.controls.guestCount.touched)
-                "
-              />
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            @if (isAdmin()) {
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Sucursal</label>
-                <select
-                  formControlName="branchId"
-                  class="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 outline-none transition cursor-pointer"
-                >
-                  <option value="">Selecciona una sucursal</option>
-                  @for (branch of branches(); track branch.id) {
-                    <option [value]="branch.id">{{ branch.name }}</option>
-                  }
-                </select>
-              </div>
-            } @else {
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Sucursal</label>
-                <div
-                  class="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-800"
-                >
-                  {{ cashierBranchName() }}
-                </div>
-              </div>
-            }
-
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-stone-700">Zona</label>
-              <select
-                formControlName="zoneId"
-                class="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 outline-none transition cursor-pointer disabled:bg-stone-50 disabled:text-stone-400"
-                [disabled]="loadingZones() || !form.controls.branchId.value"
-              >
-                <option value="">Selecciona una zona</option>
-                @for (zone of availableZones(); track zone.id) {
-                  <option [value]="zone.id">{{ zone.name }}</option>
-                }
-              </select>
-
-              @if (loadingZones()) {
-                <p class="mt-1.5 text-xs text-stone-500">Cargando zonas...</p>
-              } @else if (
-                !loadingZones() && availableZones().length === 0 && form.controls.branchId.value
-              ) {
-                <p class="mt-1.5 text-xs text-red-600">
-                  No hay zonas activas disponibles para esta sucursal.
-                </p>
-              }
-            </div>
-          </div>
-
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-stone-700">Tipo de evento</label>
-            <input
-              type="text"
-              formControlName="eventType"
-              class="w-full rounded-2xl border px-4 py-3 outline-none transition"
-              [class.border-red-400]="
-                form.controls.eventType.invalid && form.controls.eventType.touched
-              "
-              [class.border-stone-300]="
-                !(form.controls.eventType.invalid && form.controls.eventType.touched)
-              "
-              placeholder="Cumpleaños"
-            />
-          </div>
-        </section>
-
-        <section class="space-y-4 border-t border-stone-100 pt-6">
-          <div>
-            <h4 class="text-sm font-semibold uppercase tracking-wide text-stone-500">
-              Datos del cliente
-            </h4>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-stone-700"
-                >Nombre del cliente</label
-              >
-              <input
-                type="text"
-                formControlName="customerName"
-                class="w-full rounded-2xl border px-4 py-3 outline-none transition"
-                [class.border-red-400]="
-                  form.controls.customerName.invalid && form.controls.customerName.touched
-                "
-                [class.border-stone-300]="
-                  !(form.controls.customerName.invalid && form.controls.customerName.touched)
-                "
-                placeholder="María López"
-              />
-            </div>
-
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-stone-700"
-                >Teléfono principal</label
-              >
-              <input
-                type="text"
-                formControlName="phonePrimary"
-                class="w-full rounded-2xl border px-4 py-3 outline-none transition"
-                [class.border-red-400]="
-                  form.controls.phonePrimary.invalid && form.controls.phonePrimary.touched
-                "
-                [class.border-stone-300]="
-                  !(form.controls.phonePrimary.invalid && form.controls.phonePrimary.touched)
-                "
-                placeholder="6441234567"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-stone-700"
-              >Teléfono secundario</label
-            >
-            <input
-              type="text"
-              formControlName="phoneSecondary"
-              class="w-full rounded-2xl border px-4 py-3 outline-none transition"
-              [class.border-red-400]="
-                form.controls.phoneSecondary.invalid && form.controls.phoneSecondary.touched
-              "
-              [class.border-stone-300]="
-                !(form.controls.phoneSecondary.invalid && form.controls.phoneSecondary.touched)
-              "
-              placeholder="Opcional"
-            />
-          </div>
-
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-stone-700">Notas</label>
-            <textarea
-              rows="4"
-              formControlName="notes"
-              class="w-full rounded-2xl border px-4 py-3 outline-none transition"
-              [class.border-red-400]="form.controls.notes.invalid && form.controls.notes.touched"
-              [class.border-stone-300]="
-                !(form.controls.notes.invalid && form.controls.notes.touched)
-              "
-              placeholder="Indicaciones especiales, ubicación deseada, etc."
-            ></textarea>
-          </div>
-        </section>
-
-        <div class="flex justify-end gap-3 border-t border-stone-100 pt-5">
           <button
             type="button"
-            class="rounded-2xl border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
+            class="inline-flex h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 items-center justify-center rounded-xl sm:rounded-2xl text-stone-500 transition hover:bg-stone-100 hover:text-stone-800 cursor-pointer shrink-0"
+            (click)="closeFormModal()"
+            aria-label="Cerrar modal"
+          >
+            <lucide-icon
+              [img]="iconsService.iconX"
+              class="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5"
+            />
+          </button>
+        </div>
+      </div>
+
+      <form
+        class="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-6"
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+      >
+        <div class="space-y-4 sm:space-y-5 md:space-y-6">
+          <section class="space-y-3 sm:space-y-4">
+            <div>
+              <h4 class="text-xs sm:text-sm font-semibold uppercase tracking-wide text-stone-500">
+                Datos de la reservación
+              </h4>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
+              <div>
+                <label
+                  class="mb-1 sm:mb-1.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-stone-700"
+                >
+                  <lucide-icon [img]="iconsService.calendarDay" class="h-4 w-4 text-stone-500" />
+                  Fecha
+                </label>
+                <input
+                  type="date"
+                  formControlName="reservationDate"
+                  class="w-full rounded-xl sm:rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 text-sm outline-none transition"
+                  [class.border-red-400]="
+                    form.controls.reservationDate.invalid && form.controls.reservationDate.touched
+                  "
+                  [class.border-stone-300]="
+                    !(
+                      form.controls.reservationDate.invalid && form.controls.reservationDate.touched
+                    )
+                  "
+                />
+              </div>
+
+              <div>
+                <label
+                  class="mb-1 sm:mb-1.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-stone-700"
+                >
+                  <lucide-icon [img]="iconsService.clock3" class="h-4 w-4 text-stone-500" />
+                  Hora
+                </label>
+                <input
+                  type="time"
+                  formControlName="reservationTime"
+                  class="w-full rounded-xl sm:rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 text-sm outline-none transition"
+                  [class.border-red-400]="
+                    form.controls.reservationTime.invalid && form.controls.reservationTime.touched
+                  "
+                  [class.border-stone-300]="
+                    !(
+                      form.controls.reservationTime.invalid && form.controls.reservationTime.touched
+                    )
+                  "
+                />
+              </div>
+
+              <div>
+                <label
+                  class="mb-1 sm:mb-1.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-stone-700"
+                >
+                  <lucide-icon [img]="iconsService.users" class="h-4 w-4 text-stone-500" />
+                  Personas
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  formControlName="guestCount"
+                  class="w-full rounded-xl sm:rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 text-sm outline-none transition"
+                  [class.border-red-400]="
+                    form.controls.guestCount.invalid && form.controls.guestCount.touched
+                  "
+                  [class.border-stone-300]="
+                    !(form.controls.guestCount.invalid && form.controls.guestCount.touched)
+                  "
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
+              @if (isAdmin()) {
+                <div>
+                  <label
+                    class="mb-1 sm:mb-1.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-stone-700"
+                  >
+                    <lucide-icon [img]="iconsService.building2" class="h-4 w-4 text-stone-500" />
+                    Sucursal
+                  </label>
+                  <select
+                    formControlName="branchId"
+                    class="w-full rounded-xl sm:rounded-2xl border border-stone-300 bg-white px-3 py-2 sm:px-4 sm:py-3 text-sm outline-none transition cursor-pointer"
+                  >
+                    <option value="">Selecciona una sucursal</option>
+                    @for (branch of branches(); track branch.id) {
+                      <option [value]="branch.id">{{ branch.name }}</option>
+                    }
+                  </select>
+                </div>
+              } @else {
+                <div>
+                  <label
+                    class="mb-1 sm:mb-1.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-stone-700"
+                  >
+                    <lucide-icon [img]="iconsService.building2" class="h-4 w-4 text-stone-500" />
+                    Sucursal
+                  </label>
+                  <div
+                    class="rounded-xl sm:rounded-2xl border border-stone-200 bg-stone-50 px-3 py-2 sm:px-4 sm:py-3 text-sm font-medium text-stone-800"
+                  >
+                    {{ cashierBranchName() }}
+                  </div>
+                </div>
+              }
+
+              <div>
+                <label
+                  class="mb-1 sm:mb-1.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-stone-700"
+                >
+                  <lucide-icon [img]="iconsService.mapPinned" class="h-4 w-4 text-stone-500" />
+                  Zona
+                </label>
+                <select
+                  formControlName="zoneId"
+                  class="w-full rounded-xl sm:rounded-2xl border border-stone-300 bg-white px-3 py-2 sm:px-4 sm:py-3 text-sm outline-none transition cursor-pointer disabled:bg-stone-50 disabled:text-stone-400"
+                  [disabled]="loadingZones() || !form.controls.branchId.value"
+                >
+                  <option value="">Selecciona una zona</option>
+                  @for (zone of availableZones(); track zone.id) {
+                    <option [value]="zone.id">{{ zone.name }}</option>
+                  }
+                </select>
+
+                @if (loadingZones()) {
+                  <p class="mt-1.5 text-xs text-stone-500">Cargando zonas...</p>
+                } @else if (
+                  !loadingZones() && availableZones().length === 0 && form.controls.branchId.value
+                ) {
+                  <p class="mt-1.5 text-xs text-red-600">
+                    No hay zonas activas disponibles para esta sucursal.
+                  </p>
+                }
+              </div>
+            </div>
+
+            <div>
+              <label
+                class="mb-1 sm:mb-1.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-stone-700"
+              >
+                <lucide-icon [img]="iconsService.tag" class="h-4 w-4 text-stone-500" />
+                Tipo de evento
+              </label>
+              <input
+                type="text"
+                formControlName="eventType"
+                class="w-full rounded-xl sm:rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 text-sm outline-none transition"
+                [class.border-red-400]="
+                  form.controls.eventType.invalid && form.controls.eventType.touched
+                "
+                [class.border-stone-300]="
+                  !(form.controls.eventType.invalid && form.controls.eventType.touched)
+                "
+                placeholder="Cumpleaños"
+              />
+            </div>
+          </section>
+
+          <section class="space-y-3 sm:space-y-4 border-t border-stone-100 pt-4 sm:pt-5 md:pt-6">
+            <div>
+              <h4 class="text-xs sm:text-sm font-semibold uppercase tracking-wide text-stone-500">
+                Datos del cliente
+              </h4>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
+              <div>
+                <label
+                  class="mb-1 sm:mb-1.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-stone-700"
+                >
+                  <lucide-icon [img]="iconsService.userRound" class="h-4 w-4 text-stone-500" />
+                  Nombre del cliente
+                </label>
+                <input
+                  type="text"
+                  formControlName="customerName"
+                  class="w-full rounded-xl sm:rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 text-sm outline-none transition"
+                  [class.border-red-400]="
+                    form.controls.customerName.invalid && form.controls.customerName.touched
+                  "
+                  [class.border-stone-300]="
+                    !(form.controls.customerName.invalid && form.controls.customerName.touched)
+                  "
+                  placeholder="María López"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="mb-1 sm:mb-1.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-stone-700"
+                >
+                  <lucide-icon [img]="iconsService.phone" class="h-4 w-4 text-stone-500" />
+                  Teléfono principal
+                </label>
+                <input
+                  type="text"
+                  formControlName="phonePrimary"
+                  class="w-full rounded-xl sm:rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 text-sm outline-none transition"
+                  [class.border-red-400]="
+                    form.controls.phonePrimary.invalid && form.controls.phonePrimary.touched
+                  "
+                  [class.border-stone-300]="
+                    !(form.controls.phonePrimary.invalid && form.controls.phonePrimary.touched)
+                  "
+                  placeholder="6441234567"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="mb-1 sm:mb-1.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-stone-700"
+                >
+                  <lucide-icon [img]="iconsService.phone" class="h-4 w-4 text-stone-500" />
+                  Teléfono secundario
+                </label>
+                <input
+                  type="text"
+                  formControlName="phoneSecondary"
+                  class="w-full rounded-xl sm:rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 text-sm outline-none transition"
+                  [class.border-red-400]="
+                    form.controls.phoneSecondary.invalid && form.controls.phoneSecondary.touched
+                  "
+                  [class.border-stone-300]="
+                    !(form.controls.phoneSecondary.invalid && form.controls.phoneSecondary.touched)
+                  "
+                  placeholder="Opcional"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                class="mb-1 sm:mb-1.5 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-stone-700"
+              >
+                <lucide-icon [img]="iconsService.notebookPen" class="h-4 w-4 text-stone-500" />
+                Notas
+              </label>
+              <textarea
+                rows="3"
+                formControlName="notes"
+                class="w-full rounded-xl sm:rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 text-sm outline-none transition"
+                [class.border-red-400]="form.controls.notes.invalid && form.controls.notes.touched"
+                [class.border-stone-300]="
+                  !(form.controls.notes.invalid && form.controls.notes.touched)
+                "
+                placeholder="Indicaciones especiales, ubicación deseada, etc."
+              ></textarea>
+            </div>
+          </section>
+        </div>
+      </form>
+
+      <div
+        class="shrink-0 sticky bottom-0 z-10 border-t border-stone-200 bg-white/95 px-3 py-2.5 backdrop-blur sm:px-4 sm:py-3 md:px-6 md:py-4"
+      >
+        <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            class="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-stone-300 px-4 py-2.5 sm:px-5 sm:py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
             (click)="closeFormModal()"
           >
+            <lucide-icon [img]="iconsService.eraser" class="h-4 w-4" />
             Cancelar
           </button>
 
           <button
             type="submit"
-            class="rounded-2xl bg-[#8B1E1E] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+            form="reservation-form"
+            class="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl bg-[#8B1E1E] px-4 py-2.5 sm:px-5 sm:py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             [disabled]="
               saving() ||
               (form.controls.branchId.value && !loadingZones() && availableZones().length === 0)
             "
+            (click)="submit()"
           >
-            {{ saving() ? 'Guardando...' : editingReservation() ? 'Actualizar' : 'Crear' }}
+            @if (editingReservation()) {
+              <lucide-icon [img]="iconsService.save" class="h-4 w-4" />
+              <span>{{ saving() ? 'Guardando...' : 'Actualizar' }}</span>
+            } @else {
+              <lucide-icon [img]="iconsService.save" class="h-4 w-4" />
+              <span>{{ saving() ? 'Guardando...' : 'Crear' }}</span>
+            }
           </button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 }
 
 @if (showCancelModal()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-    <div class="w-full max-w-lg rounded-3xl bg-white shadow-2xl">
-      <div class="border-b border-stone-200 px-6 py-5">
-        <h3 class="text-xl font-bold text-stone-900">Cancelar reservación</h3>
-        <p class="mt-1 text-sm text-stone-500">
-          Esta acción no elimina el registro, solo cambia su estatus a cancelada.
-        </p>
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 md:px-4">
+    <div class="w-full max-w-lg rounded-2xl md:rounded-3xl bg-white shadow-2xl">
+      <div class="border-b border-stone-200 px-4 py-4 md:px-6 md:py-5">
+        <div class="flex items-start gap-3">
+          <div
+            class="flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-full bg-red-100"
+          >
+            <lucide-icon
+              [img]="iconsService.alertTriangle"
+              class="h-5 w-5 md:h-6 md:w-6 text-red-600"
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-lg md:text-xl font-bold text-stone-900">Cancelar reservación</h3>
+            <p class="mt-1 text-xs md:text-sm text-stone-500">
+              Esta acción no elimina el registro, solo cambia su estatus a cancelada.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div class="space-y-5 px-6 py-6">
+      <div class="space-y-4 md:space-y-5 px-4 py-5 md:px-6 md:py-6">
         <div class="rounded-2xl bg-stone-50 p-4">
-          <p class="text-sm font-semibold text-stone-900">
-            {{ cancellingReservation()?.customerName }}
-          </p>
-          <p class="mt-1 text-sm text-stone-600">
-            {{ cancellingReservation()?.reservationDate }}
-            ·
-            {{ formatTime(cancellingReservation()?.reservationTime || '') }}
-          </p>
-          <p class="mt-1 text-sm text-stone-500">
-            {{
-              cancellingReservation()?.branch?.name ||
-                'Sucursal ' + cancellingReservation()?.branchId
-            }}
-            ·
-            {{ cancellingReservation()?.zone?.name || 'Zona ' + cancellingReservation()?.zoneId }}
-          </p>
+          <div class="flex items-start gap-2 mb-3">
+            <lucide-icon [img]="iconsService.userRound" class="h-4 w-4 text-stone-500 mt-0.5" />
+            <div class="flex-1 min-w-0">
+              <p class="text-xs text-stone-500 mb-0.5">Cliente</p>
+              <p class="text-sm font-semibold text-stone-900">
+                {{ cancellingReservation()?.customerName }}
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="flex items-start gap-2">
+              <lucide-icon [img]="iconsService.calendarDay" class="h-4 w-4 text-stone-500 mt-0.5" />
+              <div>
+                <p class="text-xs text-stone-500 mb-0.5">Fecha</p>
+                <p class="text-sm font-medium text-stone-700">
+                  {{ cancellingReservation()?.reservationDate | date: 'dd/MM/yyyy' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2">
+              <lucide-icon [img]="iconsService.clock3" class="h-4 w-4 text-stone-500 mt-0.5" />
+              <div>
+                <p class="text-xs text-stone-500 mb-0.5">Hora</p>
+                <p class="text-sm font-medium text-stone-700">
+                  {{ formatTime(cancellingReservation()?.reservationTime || '') }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex items-start gap-2">
+              <lucide-icon [img]="iconsService.building2" class="h-4 w-4 text-stone-500 mt-0.5" />
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-stone-500 mb-0.5">Sucursal</p>
+                <p class="text-sm font-medium text-stone-700 truncate">
+                  {{
+                    cancellingReservation()?.branch?.name ||
+                      'Sucursal ' + cancellingReservation()?.branchId
+                  }}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2">
+              <lucide-icon [img]="iconsService.mapPinned" class="h-4 w-4 text-stone-500 mt-0.5" />
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-stone-500 mb-0.5">Zona</p>
+                <p class="text-sm font-medium text-stone-700 truncate">
+                  {{
+                    cancellingReservation()?.zone?.name || 'Zona ' + cancellingReservation()?.zoneId
+                  }}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-stone-700">Motivo (opcional)</label>
+          <label class="mb-1.5 flex items-center gap-2 text-sm font-medium text-stone-700">
+            <lucide-icon [img]="iconsService.notebookPen" class="h-4 w-4 text-stone-500" />
+            Motivo de cancelación (opcional)
+          </label>
           <textarea
             rows="3"
             [formControl]="cancelForm.controls.reason"
-            class="w-full rounded-2xl border border-stone-300 px-4 py-3 outline-none transition"
+            class="w-full rounded-2xl border border-stone-300 px-4 py-3 text-sm outline-none transition focus:border-red-400"
             placeholder="El cliente canceló por teléfono..."
           ></textarea>
         </div>
       </div>
 
-      <div class="flex justify-end gap-3 border-t border-stone-200 px-6 py-5">
+      <div
+        class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 md:gap-3 border-t border-stone-200 px-4 py-4 md:px-6 md:py-5"
+      >
         <button
           type="button"
-          class="rounded-2xl border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
+          class="inline-flex items-center justify-center gap-2 rounded-2xl border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
           (click)="closeCancelModal()"
         >
+          <lucide-icon [img]="iconsService.iconX" class="h-4 w-4" />
           Cerrar
         </button>
 
         <button
           type="button"
-          class="rounded-2xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+          class="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           [disabled]="saving()"
           (click)="confirmCancel()"
         >
-          {{ saving() ? 'Cancelando...' : 'Confirmar cancelación' }}
+          <lucide-icon [img]="iconsService.circleX" class="h-4 w-4" />
+          <span>{{ saving() ? 'Cancelando...' : 'Confirmar cancelación' }}</span>
         </button>
       </div>
     </div>
