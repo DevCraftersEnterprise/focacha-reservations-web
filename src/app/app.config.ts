@@ -2,7 +2,7 @@ import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalE
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { AppInitService } from './core/services/app-init.service';
 
@@ -13,7 +13,10 @@ export const appConfig: ApplicationConfig = {
       routes,
       withInMemoryScrolling({ scrollPositionRestoration: 'top' })
     ),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(
+      withFetch(), // Enable Fetch API for better CORS support
+      withInterceptors([authInterceptor])
+    ),
     provideAppInitializer(() => inject(AppInitService).init())
   ]
 };
