@@ -6,20 +6,28 @@
     </div>
 
     <!-- Sidebar móvil overlay -->
-    @if (isMobileSidebarOpen()) {
-      <div class="fixed inset-0 z-50 lg:hidden">
-        <!-- Backdrop -->
-        <div
-          class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-          (click)="closeMobileSidebar()"
-        ></div>
+    <div
+      class="fixed inset-0 z-50 lg:hidden transition-all duration-300"
+      [class.pointer-events-none]="!isMobileSidebarOpen()"
+      [class.pointer-events-auto]="isMobileSidebarOpen()"
+    >
+      <!-- Backdrop -->
+      <div
+        class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out"
+        [class.opacity-0]="!isMobileSidebarOpen()"
+        [class.opacity-100]="isMobileSidebarOpen()"
+        (click)="closeMobileSidebar()"
+      ></div>
 
-        <!-- Sidebar panel -->
-        <div class="absolute left-0 top-0 h-full w-[280px] animate-in slide-in-from-left">
-          <app-sidebar (itemClick)="closeMobileSidebar()" />
-        </div>
+      <!-- Sidebar panel -->
+      <div
+        class="absolute left-0 top-0 h-full w-70 transition-transform duration-300 ease-out"
+        [class.-translate-x-full]="!isMobileSidebarOpen()"
+        [class.translate-x-0]="isMobileSidebarOpen()"
+      >
+        <app-sidebar (itemClick)="closeMobileSidebar()" />
       </div>
-    }
+    </div>
 
     <div class="flex min-h-screen flex-col">
       <app-topbar (menuToggle)="toggleMobileSidebar()" />
