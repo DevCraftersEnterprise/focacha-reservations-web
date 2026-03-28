@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 
@@ -11,6 +11,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class SidebarComponent {
   readonly authService = inject(AuthService);
+  readonly itemClick = output<void>();
 
   readonly menuItems = computed(() => {
     const isAdmin = this.authService.isAdmin();

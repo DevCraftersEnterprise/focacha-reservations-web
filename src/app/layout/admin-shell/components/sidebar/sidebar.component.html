@@ -10,6 +10,7 @@
         [routerLink]="item.route"
         routerLinkActive="bg-[#8B1E1E] text-white"
         class="block rounded-xl px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-[#8B1E1E] hover:text-white"
+        (click)="itemClick.emit()"
       >
         {{ item.label }}
       </a>

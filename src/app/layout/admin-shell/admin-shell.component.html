@@ -1,13 +1,30 @@
 <div class="min-h-screen bg-[#FFFDFC] text-[#1F1A17]">
   <div class="grid min-h-screen grid-cols-1 lg:grid-cols-[260px_1fr]">
+    <!-- Sidebar desktop -->
     <div class="hidden lg:block">
       <app-sidebar />
     </div>
 
-    <div class="flex min-h-screen flex-col">
-      <app-topbar />
+    <!-- Sidebar móvil overlay -->
+    @if (isMobileSidebarOpen()) {
+      <div class="fixed inset-0 z-50 lg:hidden">
+        <!-- Backdrop -->
+        <div
+          class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+          (click)="closeMobileSidebar()"
+        ></div>
 
-      <main class="flex-1 p-6">
+        <!-- Sidebar panel -->
+        <div class="absolute left-0 top-0 h-full w-[280px] animate-in slide-in-from-left">
+          <app-sidebar (itemClick)="closeMobileSidebar()" />
+        </div>
+      </div>
+    }
+
+    <div class="flex min-h-screen flex-col">
+      <app-topbar (menuToggle)="toggleMobileSidebar()" />
+
+      <main class="flex-1 p-4 sm:p-6">
         <router-outlet />
       </main>
     </div>

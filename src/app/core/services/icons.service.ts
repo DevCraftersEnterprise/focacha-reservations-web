@@ -10,6 +10,7 @@ import {
   LucideClock3,
   LucideEraser,
   LucideMapPinned,
+  LucideMenu,
   LucideNotebookPen,
   LucidePencil,
   LucidePhone,
@@ -35,6 +36,7 @@ export class IconsService {
   readonly clock3 = LucideClock3;
   readonly eraser = LucideEraser;
   readonly mapPinned = LucideMapPinned;
+  readonly menu = LucideMenu;
   readonly notebookPen = LucideNotebookPen;
   readonly pencil = LucidePencil;
   readonly phone = LucidePhone;
