@@ -20,12 +20,7 @@ export class UsersService {
   }
 
   create(payload: CreateUserRequest): Observable<UserItem> {
-    try {
-      return this.http.post<UserItem>(`${this.apiUrl}/users`, payload);
-    } catch (error) {
-      console.error('Error creating user:', error);
-      throw error;
-    }
+    return this.http.post<UserItem>(`${this.apiUrl}/users`, payload);
   }
 
   update(id: string, payload: UpdateUserRequest): Observable<UserItem> {
