@@ -169,7 +169,6 @@ export class UsersComponent {
       lastName: raw.lastName.trim(),
       email: raw.email.trim(),
       role: raw.role,
-      isActive: raw.isActive,
     }
 
     let request$;
