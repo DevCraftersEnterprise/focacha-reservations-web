@@ -9,6 +9,7 @@ import {
   LucideCircleX,
   LucideClock3,
   LucideEraser,
+  LucideFileText,
   LucideLayoutDashboard,
   LucideLogOut,
   LucideMapPinned,
@@ -37,6 +38,7 @@ export class IconsService {
   readonly circleX = LucideCircleX;
   readonly clock3 = LucideClock3;
   readonly eraser = LucideEraser;
+  readonly fileText = LucideFileText;
   readonly layoutDashboard = LucideLayoutDashboard;
   readonly logOut = LucideLogOut;
   readonly mapPinned = LucideMapPinned;

@@ -27,6 +27,10 @@ export class ReservationsService {
     return this.http.get<ReservationItem>(`${this.apiUrl}/reservations/${id}`);
   }
 
+  findDocument(id: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/reservations/${id}/document`, { responseType: 'blob' });
+  }
+
   create(payload: CreateReservationRequest): Observable<ReservationItem> {
     return this.http.post<ReservationItem>(`${this.apiUrl}/reservations`, payload);
   }

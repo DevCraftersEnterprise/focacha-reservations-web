@@ -95,9 +95,6 @@ export class ReservationsComponent implements OnDestroy {
     this.branchIdSub?.unsubscribe();
   }
 
-  private getEffectiveCashierBranchId(): string {
-    return this.currentUser()?.branchId || this.currentUser()?.branch?.id || '';
-  }
 
   loadBranches(): void {
     if (this.isCashier()) {
@@ -396,6 +393,21 @@ export class ReservationsComponent implements OnDestroy {
 
   formatTime(value: string): string {
     return value?.slice(0, 5) ?? '';
+  }
+
+  loadDocument(reservationId: string): void {
+    this.reservationsService.findDocument(reservationId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        this.errorMessage.set(
+          this.extractErrorMessage(error, 'No se pudo cargar el documento.'),
+        );
+      },
+    });
   }
 
   private formatTimeForInput(value: string): string {

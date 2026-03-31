@@ -239,6 +239,18 @@
 
                 <td class="px-6 py-4">
                   <div class="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      class="rounded-2xl border border-[#8B1E1E] px-3 py-2 text-sm font-medium text-[#8B1E1E] transition hover:bg-[#8B1E1E] hover:text-white cursor-pointer"
+                      (click)="loadDocument(reservation.id)"
+                      title="Ver documento"
+                    >
+                      <div class="flex items-center">
+                        <lucide-icon [img]="iconsService.fileText" class="h-4 w-4" />
+                        <span class="ml-1 hidden xl:inline">Ver PDF</span>
+                      </div>
+                    </button>
+
                     @if (reservation.status === 'ACTIVE') {
                       <button
                         type="button"
@@ -376,8 +388,19 @@
               </div>
 
               <!-- Acciones -->
-              @if (reservation.status === 'ACTIVE') {
-                <div class="flex gap-2 pt-1">
+              <div class="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  class="flex-1 sm:flex-none rounded-2xl border border-[#8B1E1E] px-4 py-2.5 text-sm font-medium text-[#8B1E1E] transition hover:bg-[#8B1E1E] hover:text-white cursor-pointer"
+                  (click)="loadDocument(reservation.id)"
+                >
+                  <div class="flex items-center justify-center">
+                    <lucide-icon [img]="iconsService.fileText" class="h-4 w-4 mr-1.5" />
+                    Ver PDF
+                  </div>
+                </button>
+
+                @if (reservation.status === 'ACTIVE') {
                   <button
                     type="button"
                     class="flex-1 sm:flex-none rounded-2xl border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50 cursor-pointer"
@@ -399,8 +422,8 @@
                       Cancelar
                     </div>
                   </button>
-                </div>
-              }
+                }
+              </div>
             </div>
           </div>
         }
