@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://api.focacha.com',
+    apiUrl: 'https://focacha-reservations-api.onrender.com',
 };
